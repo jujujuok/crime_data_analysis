@@ -7,24 +7,50 @@ format: html
 
 # Crime Data Analysis
 
+Data: <https://catalog.data.gov/dataset/crime-data-from-2020-to-present>
+
+About Data: <https://data.lacity.org/Public-Safety/Crime-Data-from-2020-to-Present/2nrs-mtv8/about_data>
+
+Anmerkung: Mögliche Ungenauigkeiten, da die Daten von Papier Akten übertragen wurden
+
+OCC = Occurrence
+
 ## 1. Definition/Formulierung der Fragestellung
 
 -   Welche Klassen von Straftaten werden wie häufig begangen?
+    -   Anzahl Proportional zu Schweregrad
+    -   Viele Diebstahle & andere Straftaten um Geld zu beschaffen
 -   Welche Stadtteile sind besonders betroffen?
+    -   Ärmere Stadtteile
+    -   Stadtteile mit Gang Gebieten
 -   Welche Stadtteile haben besonders viele Straftaten mit Gang Einfluss?
+    -   Kenne mich zu schlecht in LA aus
+    -   Nicht Downtown & Beverly Hills (wohlhabendere Gegenden)
 -   Welche Bevölkerungsgruppe ist am meisten gefährdet? (Abhängig von Alter, Geschlecht, Abstammung)
+    -   Junge Männer Schwarzer/Hispanischer Abstammung (weniger Wohlhaben + Gangs)
+    -   Junge weiße Frauen bei Sexualstraftaten
 -   Gibt es besonders Gefährliche Arten von Orten (\[Premise Desc\])
+    -   Motels, Parking Lot, Street
+    -   Internet aka. Cyberspace
 -   Welche Arten von Waffen wird am meisten genutzt?
+    -   Meistens nur unbewaffnet
+    -   Recht viele Schusswaffen
 -   Wie viel Prozent haben zu Verhaftungen (und welcher Art) geführt?
+    -   Hoffentlich über 80%
 -   Gibt es zeitliche Rahmen in denen mehr oder weniger Verbrechen geschehen?
+    -   Am meisten am Abend/in der Nacht
+    -   Anfang/Ende des Monats mehr Diebstahl/Raub? --\> Gehalt auszahlung Diebstahl usw.?
+    -   Wochenenden -\> Party etc
+    -   Sommer -\> Menschen drehen bei Hitze durch
+    -   Dunkle Jahreszeiten -\> Schutz in der Dunkelheit
 -   Wie effektiv ist die LAPD bei der Aufklärung verschiedener Arten von Straftaten?
--   Welche Straftaten werden häufig am Anfang/Ende des Monats begangen? --\> Gehalt auszahlung Diebstahl usw.?
+    -   Straftaten mit direktem Opfer mehr (Zeugen vorhanden)
+-   Welche Straftaten werden häufig am Anfang/Ende des Monats begangen?
+    -   Gehalt auszahlung Diebstahl usw.?
 -   Wie hat sich die Kriminalität über die 3 Jahre verändert?
+    -   In Corona deutlich abgenommen, ansonsten zugenommen
 -   Wie häufig werden welche Bevölkerungsgruppen angezeigt / vgl zu wie viele Leute welcher Bevölkerungsgruppe wohnen dort?
-
-## Was erwarten wir?
-
--   Anfang/Ende des Monats mehr Diebstahl/Raub? --\> Gehalt auszahlung Diebstahl usw.?
+    -   Nicht in Datensatz glaube
 
 ## 2. Laden der Daten
 
@@ -47,8 +73,16 @@ Beschreiben Sie, was Sie tun müssen, bevor Sie die Daten im nächsten Abschnitt
 ```{r}
 # Laden der Daten
 library(readr) 
-crimes.df <- read_csv('Crime_Data_from_2020_to_Present.csv') 
-crimes.df
+crimes.df.raw <- read_csv('Crime_Data_from_2020_to_Present.csv') 
+head(crimes.df.raw)
+```
+
+```{r}
+crimes.df <- transform(crimes.df.raw,
+    "Date Rptd" = as.Date(substr("Date Rptd", 1, 10), format = "%m/%d/%Y")
+)
+
+head(crimes.df)
 ```
 
 ## 3. Transformation & Bearbeitung
