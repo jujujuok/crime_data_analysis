@@ -71,8 +71,10 @@ Beschreiben Sie, was Sie tun müssen, bevor Sie die Daten im nächsten Abschnitt
 :::
 
 ```{r}
+rm(list=ls())
+
 # Laden der Daten
-library(readr) 
+library(readr) rm(list=ls())
 crimes.df.raw <- read_csv('Crime_Data_from_2020_to_Present.csv') 
 head(crimes.df.raw)
 ```
