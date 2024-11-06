@@ -15,7 +15,47 @@ Anmerkung: Mögliche Ungenauigkeiten, da die Daten von Papier Akten übertragen 
 
 OCC = Occurrence
 
+## 0. Beschreibung des Datensatzes
+
+Crime Data Datensatz aus Los Angeles, USA
+
+Zeitraum: 2020-2024
+
+Beinhaltet
+
+-   Location
+
+-   Modus Operandi
+
+    -   zB Täterbeschreibung, ..
+
+-   Zeitpunkt
+
+-   Tatwaffen
+
+-   Opferbeschreibung
+
+    -   Geschlecht,
+
+    -   Abstammung
+
+    -   Alter
+
+-   Tatbeschreibung (Kategorien)
+
+-   Tatbestände (bis zu 4 -\> crime codes)
+
 ## 1. Definition/Formulierung der Fragestellung
+
+::: {.callout-note icon="false"}
+## Aufgabenstellung (10 Pkt.) X
+
+Definieren Sie eine Sie interessierende bzw. interessante Fragestellung im Zusammenhang mit dem Datensatz:
+
+-   Was interessiert Sie an dem Datensatz? X
+-   Welche spezifische Fragestellung würden Sie gern mit Hilfe des Datensatzes beantworten? X
+-   Was erwarten Sie, angesichts Ihrer Fragestellung, bezüglich des Datensatzes? X
+:::
 
 -   Welche Klassen von Straftaten werden wie häufig begangen?
     -   Anzahl Proportional zu Schweregrad
@@ -59,11 +99,13 @@ OCC = Occurrence
 
 Laden Sie die Daten in die R-Sitzung und verschaffen Sie sich einen ersten Überblick
 
--   Ist sichergestellt, dass alle Daten den richtigen Typ haben?
+-   Welche Typen sind enthalten? X
 
--   Haben die Daten irgendwelche "Seltsamkeiten" mit denen Sie umgehen müssen, wie z.B. anders codierte `NA`'s, mehrere Tabellen, ... etc.
+-   Ist sichergestellt, dass alle Daten den richtigen Type haben? X
 
--   Je nach Datensatz können Sie die Daten auch in eine Datenbank laden und dann auf diese in R zugreifen.
+-   Haben die Daten irgendwelche "Seltsamkeiten" mit denen Sie umgehen müssen, wie z.B. anders codierte `NA`'s, mehrere Tabellen, ... etc. \#
+
+-   Je nach Datensatz können Sie die Daten auch in eine Datenbank laden und dann auf diese in R zugreifen. X
 
 Beschreiben Sie, was Sie tun müssen, bevor Sie die Daten im nächsten Abschnitt aufbereiten und bearbeiten können!
 :::
@@ -77,36 +119,63 @@ crimes.df.raw <- read_csv('Crime_Data_from_2020_to_Present.csv')
 head(crimes.df.raw)
 
 # Welche Typen sind enthalten?
-str(crimes.df.raw)
-
 sapply(crimes.df.raw, class)
-
-summary(crimes.df.raw)
-
-sapply(crimes.df.raw, function(x) sum(is.na(x)))
 ```
+
+### Einlesen der Modus Operandi Codes
 
 ```{r}
-codes_to_numeric <- function(x) {
-  if (is.na(x)) {
-    return(NA)
-  } else {
-    return(as.numeric(strsplit(x, " ")[[1]]))
-  }
-}
+library(tidyr)
 
-crimes.df <- transform(crimes.df.raw,
-    `Date Rptd` = as.Date(substr(`Date Rptd`, 1, 10), format = "%m/%d/%Y"),
-    `DATE OCC` = as.Date(substr(`DATE OCC`, 1, 10), format = "%m/%d/%Y"),
-    `TIME OCC` = as.integer(`TIME OCC`),
-    `AREA` = as.integer(`AREA`),
-    `Rpt Dist No` = as.integer(`Rpt Dist No`),
-    `Crm Cd` = as.integer(`Crm Cd`),
-    `Mocodes` = lapply(Mocodes, codes_to_numeric)
-)
+mocodes.df.dirty <- read_delim("MO_CODES_Numerical_20191119.txt",
+                 delim = "\\s+",
+                 col_names = c("CodeBeschreibung"),
+                 trim_ws = TRUE)
 
-head(crimes.df)
+mocodes.df <- mocodes.df.dirty %>%
+  separate(CodeBeschreibung,
+           into = c("Code", "Beschreibung"),
+           sep = "(?<=[0-9])\\s+",
+           extra = "merge")
 ```
+
+### Analyse Rohdaten
+
+-   Modus Operandi –\> richtige Nummern zum zuordnen mit der Tabelle von MO-Codes
+
+-   Datum Format
+
+-   Es existieren NAs in manchen Spalten
+
+-   Nummern als String –\> Nummern
+
+In manchen Spalten befinden sich NAs, dazu gehören:
+
+-   Weapon
+
+-   Weapon Descd
+
+-   Crime Codes –\> nicht alle Taten
+
+### Überprüfung Aussagen der Metadaten:
+
+-   Crm Cd should be the same as Crm Cd 1
+
+    Crm Cd 1 sollte die gleichen Werte wie Crm Cd haben:
+
+    |        |                                                       |
+    |--------|-------------------------------------------------------|
+    | Crm Cd | Indicates the crime committed. (Same as Crime Code 1) |
+
+    Es gibt aber 1956 unterschiedliche Werte –\> todo analyse später
+
+-   Part 1-2 Weg löschen ?!
+
+-   Area = Area Name ?!
+
+-   Premise Cd = Premise Desc ?!
+
+-   Weapon Use Cd = Weapon Desc ?!
 
 ## 3. Transformation & Bearbeitung
 
@@ -124,30 +193,69 @@ head(crimes.df)
 Sind die sich ergebenden Daten so, wie Sie es erwartet haben? Warum oder warum nicht?
 :::
 
+### Aufbereitung / Umcodierung
+
 ```{r}
-library(tidyr)
+# Aufbereitung der Liste mit Codes zur Zuordnung der Modus Operandi
+codes_to_numeric <- function(x) {
+  if (is.na(x)) {
+    return(NA)
+  } else {
+    return(as.numeric(strsplit(x, " ")[[1]]))
+  }
+}
 
-mocodes.df.dirty <- read_delim("MO_CODES_Numerical_20191119.txt",
-                 delim = "\\s+",
-                 col_names = c("CodeBeschreibung"),
-                 trim_ws = TRUE)
-
-mocodes.df <- mocodes.df.dirty %>%
-  separate(CodeBeschreibung,
-           into = c("Code", "Beschreibung"),
-           sep = "(?<=[0-9])\\s+",
-           extra = "merge")
-
-head(mocodes.df)
+# Transformation der Daten zu sinnvollen Datentypen
+crimes.df <- transform(crimes.df.raw,
+    `Date Rptd` = as.Date(substr(`Date Rptd`, 1, 10), format = "%m/%d/%Y"),
+    `DATE OCC` = as.Date(substr(`DATE OCC`, 1, 10), format = "%m/%d/%Y"),
+    `TIME OCC` = as.integer(`TIME OCC`),
+    `AREA` = as.integer(`AREA`),
+    `Rpt Dist No` = as.integer(`Rpt Dist No`),
+    `Crm Cd` = as.integer(`Crm Cd`),
+    `Mocodes` = lapply(Mocodes, codes_to_numeric)
+)
 ```
 
 ```{r}
-crimes.df <- crimes.df[-24] # Crm Cd 4 is only NA
+crmCd.diff <- which(crimes.df["Crm Cd"] != crimes.df["Crm Cd 1"])
+length(crmCd.diff)
 ```
 
 ```{r}
-crimes.df
+# Überprüfen, ob die Spalte nur NAs enthält
+if (all(is.na(crimes.df[["Crm Cd 4"]]))) {
+  crimes.df[["Crm Cd 4"]] <- NULL
+}
 ```
+
+```{r}
+# Löschen von Part 1-2
+# Todo Begründung
+crimes.df[["Part 1-2"]] <- NULL
+```
+
+### Joining
+
+-   MO & Tabelle
+
+neeeee
+
+Begründung
+
+### Subsetting
+
+-   Area
+
+-   Geschlecht
+
+-   Abstammung
+
+-   Art des Crimes
+
+### Übersicht des Dataframes
+
+## Fazit - Transformation & Bearbeitung
 
 ## 4. Geeignete Visualisierung und Aggregation der Daten
 
@@ -158,6 +266,67 @@ Fassen Sie die Daten in einer geeigenten Form zur Beantwortung Ihrer formulierte
 
 Hier könne Sie auch geeignete statistische Verfahren bzw. Modellierungen nutzen, falls diese Ihnen bezüglich Ihrer Fragestellung weiterhelfen.
 :::
+
+-   Welche Klassen von Straftaten werden wie häufig begangen?
+    -   Anzahl Proportional zu Schweregrad
+    -   Viele Diebstahle & andere Straftaten um Geld zu beschaffen
+-   Welche Stadtteile sind besonders betroffen?
+    -   Ärmere Stadtteile
+    -   Stadtteile mit Gang Gebieten
+
+```{r}
+
+```
+
+### Visualisierung der Crime Arten
+
+### Visualisierung der Straftaten auf einer Karte
+
+```{r}
+crimes.df.no_id_theft <- subset(crimes.df, `Crm Cd` != 354)
+length(crimes.df.no_id_theft)
+#crimes.df.no_id_theft <- crimes.df.no_id_theft[1:1000, ]
+```
+
+```{r}
+# Bibliothek laden
+library(leaflet)
+
+# Eine interaktive OpenStreetMap-Karte erstellen
+leaflet(crimes.df.no_id_theft) %>%
+  addTiles() %>%  # Standard-OSM-Karte
+  setView(lng = -118.2437, lat = 34.0522, zoom = 9) %>%  # Ansicht auf Los Angeles
+  addCircleMarkers(~LON, ~LAT, 
+                   radius = 5, 
+                   color = "blue", 
+                   stroke = FALSE, 
+                   fillOpacity = 0.8, 
+                   popup = ~paste("ID:", `Crm Cd Desc`))  # Popup mit der DR_NO ID
+```
+
+### Welche Klassen von Straftaten werden wie häufig begangen?
+
+### Welche Stadtteile sind besonders betroffen?
+
+### Welche Stadtteile haben besonders viele Straftaten mit Gang Einfluss?
+
+### Welche Bevölkerungsgruppe ist am meisten gefährdet? (Abhängig von Alter, Geschlecht, Abstammung)
+
+### Gibt es besonders Gefährliche Arten von Orten (\[Premise Desc\])
+
+### Welche Arten von Waffen wird am meisten genutzt?
+
+### Wie viel Prozent haben zu Verhaftungen (und welcher Art) geführt?
+
+### Gibt es zeitliche Rahmen in denen mehr oder weniger Verbrechen geschehen?
+
+### Wie effektiv ist die LAPD bei der Aufklärung verschiedener Arten von Straftaten?
+
+### Welche Straftaten werden häufig am Anfang/Ende des Monats begangen?
+
+### Wie hat sich die Kriminalität über die 3 Jahre verändert?
+
+### Wie häufig werden welche Bevölkerungsgruppen angezeigt / vgl zu wie viele Leute welcher Bevölkerungsgruppe wohnen dort?
 
 ## 5. Zusammenfassung und Schlussfolgerung
 
