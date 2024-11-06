@@ -78,8 +78,22 @@ head(crimes.df.raw)
 ```
 
 ```{r}
+codes_to_numeric <- function(x) {
+  if (is.na(x)) {
+    return(NA)
+  } else {
+    return(as.numeric(strsplit(x, " ")[[1]]))
+  }
+}
+
 crimes.df <- transform(crimes.df.raw,
-    "Date Rptd" = as.Date(substr("Date Rptd", 1, 10), format = "%m/%d/%Y")
+    `Date Rptd` = as.Date(substr(`Date Rptd`, 1, 10), format = "%m/%d/%Y"),
+    `DATE OCC` = as.Date(substr(`DATE OCC`, 1, 10), format = "%m/%d/%Y"),
+    `TIME OCC` = as.integer(`TIME OCC`),
+    `AREA` = as.integer(`AREA`),
+    `Rpt Dist No` = as.integer(`Rpt Dist No`),
+    `Crm Cd` = as.integer(`Crm Cd`),
+    `Mocodes` = lapply(Mocodes, codes_to_numeric)
 )
 
 head(crimes.df)
