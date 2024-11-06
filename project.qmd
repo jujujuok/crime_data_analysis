@@ -59,8 +59,6 @@ OCC = Occurrence
 
 Laden Sie die Daten in die R-Sitzung und verschaffen Sie sich einen ersten Überblick
 
--   Welche Typen sind enthalten?
-
 -   Ist sichergestellt, dass alle Daten den richtigen Typ haben?
 
 -   Haben die Daten irgendwelche "Seltsamkeiten" mit denen Sie umgehen müssen, wie z.B. anders codierte `NA`'s, mehrere Tabellen, ... etc.
@@ -74,9 +72,18 @@ Beschreiben Sie, was Sie tun müssen, bevor Sie die Daten im nächsten Abschnitt
 rm(list=ls())
 
 # Laden der Daten
-library(readr) rm(list=ls())
+library(readr)
 crimes.df.raw <- read_csv('Crime_Data_from_2020_to_Present.csv') 
 head(crimes.df.raw)
+
+# Welche Typen sind enthalten?
+str(crimes.df.raw)
+
+sapply(crimes.df.raw, class)
+
+summary(crimes.df.raw)
+
+sapply(crimes.df.raw, function(x) sum(is.na(x)))
 ```
 
 ```{r}
