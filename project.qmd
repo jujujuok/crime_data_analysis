@@ -126,6 +126,7 @@ sapply(crimes.df.raw, class)
 
 ```{r}
 library(tidyr)
+library(dplyr)
 
 mocodes.df.dirty <- read_delim("MO_CODES_Numerical_20191119.txt",
                  delim = "\\s+",
@@ -136,7 +137,8 @@ mocodes.df <- mocodes.df.dirty %>%
   separate(CodeBeschreibung,
            into = c("Code", "Beschreibung"),
            sep = "(?<=[0-9])\\s+",
-           extra = "merge")
+           extra = "merge") %>%
+  mutate(Code = as.integer(Code)) 
 ```
 
 ### Analyse Rohdaten
@@ -239,9 +241,22 @@ crimes.df[["Part 1-2"]] <- NULL
 
 -   MO & Tabelle
 
-neeeee
+```{r}
+library(purrr)
 
-Begründung
+crimes.df.joined <- crimes.df %>% 
+  mutate(`MoCd Desc` = map(Mocodes, ~ mocodes.df$Beschreibung[match(.x, mocodes.df$Code)])) %>%
+  relocate(`MoCd Desc`, .after = `Mocodes`)
+
+# Make Lists readable (comma seperated)
+#crimes.df.joined %>%
+#   mutate(
+#     codes_str = map_chr(Mocodes, ~ paste(.x, collapse = ", ")),
+#     meanings_str = map_chr(`MoCd Desc`, ~ paste(.x, collapse = ", "))
+#   ) %>%
+#   select(DR_NO, codes_str, meanings_str) %>%
+#   View()
+```
 
 ### Subsetting
 
@@ -285,7 +300,7 @@ Hier könne Sie auch geeignete statistische Verfahren bzw. Modellierungen nutzen
 ```{r}
 crimes.df.no_id_theft <- subset(crimes.df, `Crm Cd` != 354)
 length(crimes.df.no_id_theft)
-#crimes.df.no_id_theft <- crimes.df.no_id_theft[1:1000, ]
+crimes.df.no_id_theft <- crimes.df.no_id_theft[1:5000, ]
 ```
 
 ```{r}
