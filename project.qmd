@@ -319,6 +319,22 @@ leaflet(crimes.df.no_id_theft) %>%
                    popup = ~paste("ID:", `Crm Cd Desc`))  # Popup mit der DR_NO ID
 ```
 
+```{r}
+library(leaflet.extras)
+
+leaflet(crimes.df) %>%
+  addTiles() %>%  # Grundkarte hinzufügen
+  setView(lng = -118.2437, lat = 34.0522, zoom = 9) %>%
+  addHeatmap(
+    lng = ~LON,
+    lat = ~LAT,
+    intensity = nrow(crimes.df),     # Gewichtung (z.B. Anzahl der Vorfälle, falls vorhanden)
+    blur = 20,          # Blur-Faktor
+    max = 0.05,         # Maximale Intensität
+    radius = 10         # Radius für die Heatmap-Punkte
+  )
+```
+
 ### Welche Klassen von Straftaten werden wie häufig begangen?
 
 ### Welche Stadtteile sind besonders betroffen?
