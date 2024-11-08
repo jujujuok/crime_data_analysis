@@ -293,9 +293,7 @@ Hier könne Sie auch geeignete statistische Verfahren bzw. Modellierungen nutzen
 
 ```
 
-### Visualisierung der Crime Arten
-
-### Visualisierung der Straftaten auf einer Karte
+### Ortsabhängige Analysen
 
 ```{r}
 crimes.df.no_id_theft <- subset(crimes.df, `Crm Cd` != 354)
@@ -335,29 +333,62 @@ leaflet(crimes.df) %>%
   )
 ```
 
-### Welche Klassen von Straftaten werden wie häufig begangen?
 
-### Welche Stadtteile sind besonders betroffen?
+#### Welche Stadtteile sind besonders betroffen?
 
-### Welche Stadtteile haben besonders viele Straftaten mit Gang Einfluss?
 
-### Welche Bevölkerungsgruppe ist am meisten gefährdet? (Abhängig von Alter, Geschlecht, Abstammung)
 
-### Gibt es besonders Gefährliche Arten von Orten (\[Premise Desc\])
+#### Welche Stadtteile haben besonders viele Straftaten mit Gang Einfluss?
 
-### Welche Arten von Waffen wird am meisten genutzt?
 
-### Wie viel Prozent haben zu Verhaftungen (und welcher Art) geführt?
 
-### Gibt es zeitliche Rahmen in denen mehr oder weniger Verbrechen geschehen?
+#### Gibt es besonders Gefährliche Arten von Orten (\[Premise Desc\])
 
-### Wie effektiv ist die LAPD bei der Aufklärung verschiedener Arten von Straftaten?
+_Mit Lolipop Chart? (X-Achse: Orte)_
 
-### Welche Straftaten werden häufig am Anfang/Ende des Monats begangen?
+### Personenabhängige Analysen
 
-### Wie hat sich die Kriminalität über die 3 Jahre verändert?
+#### Welche Bevölkerungsgruppe ist am meisten gefährdet? (Abhängig von Alter, Geschlecht, Abstammung)
 
-### Wie häufig werden welche Bevölkerungsgruppen angezeigt / vgl zu wie viele Leute welcher Bevölkerungsgruppe wohnen dort?
+_Vergleich m & f mit Population Pyramid?_
+
+#### Wie häufig werden welche Bevölkerungsgruppen angezeigt / vgl zu wie viele Leute welcher Bevölkerungsgruppe wohnen dort?
+
+
+
+### Zeitliche Analysen
+
+#### Wie hat sich die Kriminalität über die 3 Jahre verändert?
+
+_Jahre zusammen in Time Series Plot_
+_Jahre in Seasonal Plot vergleichen? (Eine Linie Pro Jahr)_
+_Slope Chart mit Senkrechten Strichen für Jahre und Slopes für Straftatsklassen_
+
+#### Welche Straftaten werden häufig am Anfang/Ende des Monats begangen?
+
+
+
+#### Gibt es zeitliche Rahmen in denen mehr oder weniger Verbrechen geschehen?
+
+_Diverging Bars für Stunden/Tage mit Durchschnitt als Mittelwert_
+
+### Analysen der Straftaten
+
+#### Welche Arten von Waffen wird am meisten genutzt?
+
+_Waffle Chart für Straftaten_
+
+#### Welche Klassen von Straftaten werden wie häufig begangen?
+
+_TreeMap? Klassen als Kategorie und Crm Cd als Unterkategorie_
+
+#### Wie viel Prozent haben zu Verhaftungen (und welcher Art) geführt?
+
+_Pie Chart mit Verhältnis von verschiedenen Stati_
+
+#### Wie effektiv ist die LAPD bei der Aufklärung verschiedener Arten von Straftaten?
+
+_Categorized Bar Chart, jede Bar aufgeteilt in Stati (Alle Bars gleich hoch?)_
 
 ## 5. Zusammenfassung und Schlussfolgerung
 
