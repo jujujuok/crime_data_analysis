@@ -5,6 +5,7 @@ date: today
 format: html
 execute:
   warning: false
+date-format: "DD.MM.YYYY"
 ---
 
 # Crime Data Analysis
@@ -19,33 +20,9 @@ OCC = Occurrence
 
 ## 0. Beschreibung des Datensatzes
 
-Crime Data Datensatz aus Los Angeles, USA
+Der Datensatz `crime data from 2020 to present` enthält alle Berichte über beim Los Angeles Police Department (LAPD) registrierte Vorfälle in der Stadt Los Angeles (USA) vom *01.01.2020* bis zum *14.10.2024*.
 
-Zeitraum: 2020-2024
-
-Beinhaltet
-
--   Location
-
--   Modus Operandi
-
-    -   zB Täterbeschreibung, ..
-
--   Zeitpunkt
-
--   Tatwaffen
-
--   Opferbeschreibung
-
-    -   Geschlecht,
-
-    -   Abstammung
-
-    -   Alter
-
--   Tatbeschreibung (Kategorien)
-
--   Tatbestände (bis zu 4 -\> crime codes)
+Dabei sind Informationen über die Tat, wie bis zu vier Tatbestände, die verwendete Tatwaffe, Tatzeitpunkt, Tatort, sowie eine Beschreibung der Art von Umgebung angegeben. Der Tatort ist dabei laut Metadaten auf den nächsten Hunderterblock gerundet, um die Anonymität zu wahren. Über das Opfer ist dabei das Alter, das Geschlecht und die Abstammung bekannt. Wobei als Abstammung Beschreibungen wie "Weiß", "Schwarz", "Chinesisch" oder ähnliches verwendet wird. Zusätzlich gibt es eine Spalte für den Modus Operandi, welcher meist Details über die Straftat oder den Täter enthält.
 
 ## 1. Definition/Formulierung der Fragestellung
 
@@ -220,15 +197,30 @@ crmcd.categories <- tibble::tribble(
 
 ### Analyse Rohdaten
 
--   Modus Operandi –\> richtige Nummern zum zuordnen mit der Tabelle von MO-Codes
+#### Modus Operandi:
 
--   Datum Format
+Der Datensatz enthält eine Spalte mit MoCodes, welche eine Liste an Zahlen enthält. Diese Zahlen sind IDs des Mocodes Datensatzes, welcher den Modus Operandi als Beschreibung enthält.
 
--   Es existieren NAs in manchen Spalten
+#### Datums Format:
 
--   Nummern als String –\> Nummern
+Das Datum ist standardmäßig im Format `MM/DD/YYYY HH:MM:SS AM/PM` angegeben. Jedoch enthalten die Datumsspalten keine Uhrzeit, diese ist, wenn vorhanden, separat angegeben.
 
-In manchen Spalten befinden sich NAs, dazu gehören:
+#### `Char`fälschlicherweise als Datentyp
+
+Liste an Spalten mit Char als Datentyp
+
+| Spaltenname | Spaltenbeschreibung           | Passender Datentyp |
+|-------------|-------------------------------|--------------------|
+| Date Prtd   | Meldedatum                    | Date               |
+| Date OCC    | Verbrechensdatum              | Date               |
+| Time OCC    | Verbrechensuhrzeit            | Integer            |
+| Area        | Zugeordneter Bereich          | Integer            |
+| Rpt Dist No | Bezirk des Verbrechens        | Integer            |
+| Mocodes     | Liste an Modus Operandi Codes | List               |
+
+#### Spalten mit fehlenden Werten (NAs)
+
+In manchen Spalten befinden sich NAs, dazu gehören: - Es existieren NAs in manchen Spalten
 
 -   Weapon
 
@@ -507,7 +499,7 @@ leaflet(crimes.df) %>%
 
 #### Gibt es besonders Gefährliche Arten von Orten (\[Premise Desc\])
 
-```{r} 
+```{r}
 library(ggplot2) 
 library(dplyr) 
 library(forcats) 
