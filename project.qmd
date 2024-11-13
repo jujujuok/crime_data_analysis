@@ -142,6 +142,7 @@ mocodes.df <- mocodes.df.dirty %>%
            extra = "merge") %>%
   mutate(Code = as.integer(Code)) 
 ```
+
 ### Hinzufügen von Straftat Klassifikation
 
 ```{r}
@@ -500,62 +501,79 @@ leaflet(crimes.df) %>%
   )
 ```
 
-
 #### Welche Stadtteile sind besonders betroffen?
-
-
 
 #### Welche Stadtteile haben besonders viele Straftaten mit Gang Einfluss?
 
-
-
 #### Gibt es besonders Gefährliche Arten von Orten (\[Premise Desc\])
 
-_Mit Lolipop Chart? (X-Achse: Orte)_
+```{r} 
+library(ggplot2) 
+library(dplyr) 
+library(forcats) 
+library(stringr)
+
+premis.grouped <- crimes.df %>% 
+  group_by(`Premis Cd`, `Premis Desc`) %>% 
+  summarise(count = n()/1000) %>% 
+  arrange(desc(count)) %>%
+  ungroup() %>%
+  #Remove parenthesis from descriptions 
+  mutate(`Premis Desc` = gsub("\\s*\\([^\\)]+\\)", "", `Premis Desc`))
+
+ggplot(premis.grouped[1:20,], 
+       aes(x=fct_reorder(`Premis Desc`, count, .desc = T), 
+                                  y=`count`)) + 
+  geom_point(size=3) + 
+  geom_segment(aes(x=`Premis Desc`, 
+                   xend=`Premis Desc`, 
+                   y=0, 
+                   yend=`count`)) + 
+  labs(title="Straftaten an Orten", 
+       subtitle="Anzahl an Straftaten an einer bestimmten Art von Ort", 
+       x = "Ortstype", 
+       y = "Anzahl der Straftaten [in Tsd.]") + 
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 20)) + 
+  theme(axis.text.x = element_text(angle = 65, vjust=0.6))
+```
 
 ### Personenabhängige Analysen
 
 #### Welche Bevölkerungsgruppe ist am meisten gefährdet? (Abhängig von Alter, Geschlecht, Abstammung)
 
-_Vergleich m & f mit Population Pyramid?_
+*Vergleich m & f mit Population Pyramid?*
 
 #### Wie häufig werden welche Bevölkerungsgruppen angezeigt / vgl zu wie viele Leute welcher Bevölkerungsgruppe wohnen dort?
-
-
 
 ### Zeitliche Analysen
 
 #### Wie hat sich die Kriminalität über die 3 Jahre verändert?
 
-_Jahre zusammen in Time Series Plot_
-_Jahre in Seasonal Plot vergleichen? (Eine Linie Pro Jahr)_
-_Slope Chart mit Senkrechten Strichen für Jahre und Slopes für Straftatsklassen_
+*Jahre zusammen in Time Series Plot* *Jahre in Seasonal Plot vergleichen? (Eine Linie Pro Jahr)* *Slope Chart mit Senkrechten Strichen für Jahre und Slopes für Straftatsklassen*
 
 #### Welche Straftaten werden häufig am Anfang/Ende des Monats begangen?
 
-
-
 #### Gibt es zeitliche Rahmen in denen mehr oder weniger Verbrechen geschehen?
 
-_Diverging Bars für Stunden/Tage mit Durchschnitt als Mittelwert_
+*Diverging Bars für Stunden/Tage mit Durchschnitt als Mittelwert*
 
 ### Analysen der Straftaten
 
 #### Welche Arten von Waffen wird am meisten genutzt?
 
-_Waffle Chart für Straftaten_
+*Waffle Chart für Straftaten*
 
 #### Welche Klassen von Straftaten werden wie häufig begangen?
 
-_TreeMap? Klassen als Kategorie und Crm Cd als Unterkategorie_
+*TreeMap? Klassen als Kategorie und Crm Cd als Unterkategorie*
 
 #### Wie viel Prozent haben zu Verhaftungen (und welcher Art) geführt?
 
-_Pie Chart mit Verhältnis von verschiedenen Stati_
+*Pie Chart mit Verhältnis von verschiedenen Stati*
 
 #### Wie effektiv ist die LAPD bei der Aufklärung verschiedener Arten von Straftaten?
 
-_Categorized Bar Chart, jede Bar aufgeteilt in Stati (Alle Bars gleich hoch?)_
+*Categorized Bar Chart, jede Bar aufgeteilt in Stati (Alle Bars gleich hoch?)*
 
 ## 5. Zusammenfassung und Schlussfolgerung
 
