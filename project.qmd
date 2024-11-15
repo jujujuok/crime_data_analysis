@@ -106,6 +106,7 @@ sapply(crimes.df.raw, class)
 ```{r}
 library(tidyr)
 library(dplyr)
+library(ggthemes)
 
 mocodes.df.dirty <- read_delim("MO_CODES_Numerical_20191119.txt",
                  delim = "\\s+",
@@ -526,6 +527,7 @@ ggplot(premis.grouped[1:20,],
        x = "Ortstype", 
        y = "Anzahl der Straftaten [in Tsd.]") + 
   scale_x_discrete(labels = function(x) str_wrap(x, width = 20)) + 
+  theme_tufte() +  # Minimal Tufte theme
   theme(axis.text.x = element_text(angle = 65, vjust=0.6))
 ```
 
@@ -533,7 +535,36 @@ ggplot(premis.grouped[1:20,],
 
 #### Welche Bevölkerungsgruppe ist am meisten gefährdet? (Abhängig von Alter, Geschlecht, Abstammung)
 
-*Vergleich m & f mit Population Pyramid?*
+```{r}
+# Filter and summarize the data with age groups
+crimes.df.sex.age <- crimes.df %>%
+  filter(`Vict Sex` %in% c('M', 'F'), `Vict Age` >= 1) %>%
+  mutate(Age_Group = cut(`Vict Age`, breaks = seq(0, max(`Vict Age`, na.rm = TRUE) + 5, 5), 
+                         labels = paste(seq(1, max(`Vict Age`, na.rm = TRUE), by = 5),
+                                        seq(5, max(`Vict Age`, na.rm = TRUE) + 4, by = 5), sep = "-"),
+                         include.lowest = TRUE)) %>%
+  group_by(Age_Group, `Vict Sex`) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+# Define custom y-axis breaks for symmetrical pyramid
+brks <- seq(-50000, 50000, by = 10000)  # Custom breaks every 10000 up to 50000
+lbls <- abs(brks)  # Use absolute values for labels
+
+# Create the pyramid plot
+ggplot(crimes.df.sex.age, aes(x = Age_Group, y = count, fill = `Vict Sex`)) + 
+  geom_bar(data = subset(crimes.df.sex.age, `Vict Sex` == "M"), 
+           aes(y = -count), stat = "identity", width = 0.6) +  # Left side for males
+  geom_bar(data = subset(crimes.df.sex.age, `Vict Sex` == "F"), 
+           stat = "identity", width = 0.6) +  # Right side for females
+  scale_y_continuous(breaks = brks, labels = lbls) +  # Custom y-axis breaks and labels
+  coord_flip() +  # Flip axes for pyramid layout
+  labs(title = "Victim Age Distribution by Sex") +
+  theme_tufte() +  # Minimal Tufte theme
+  theme(plot.title = element_text(hjust = .5), 
+        axis.ticks = element_blank()) +   # Center plot title and remove axis ticks
+  scale_fill_brewer(palette = "Dark2")  # Color palette for gender fill
+```
 
 #### Wie häufig werden welche Bevölkerungsgruppen angezeigt / vgl zu wie viele Leute welcher Bevölkerungsgruppe wohnen dort?
 
