@@ -561,7 +561,21 @@ ggplot(premis.grouped[1:20,],
 
 #### Wie viel Prozent haben zu Verhaftungen (und welcher Art) geführt?
 
-*Pie Chart mit Verhältnis von verschiedenen Stati*
+```{r}
+status.df <-  as.data.frame(table(crimes.df$`Status Desc`))
+colnames(status.df) <- c("Status", "Count")
+
+status.df$Percentage <- round((status.df$Count / sum(status.df$Count)) * 100, 1)
+
+# Create the pie chart with percentage labels
+ggplot(status.df, aes(x = "", y = Count, fill = Status)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  theme_void() +
+  labs(title = "Distribution of Status Desc Values") +
+  eom_text(aes(label = ifelse(Percentage > 5, paste0(Percentage, "%"), "")), 
+            position = position_stack(vjust = 0.5), color = "white", size = 5)
+```
 
 #### Wie effektiv ist die LAPD bei der Aufklärung verschiedener Arten von Straftaten?
 
