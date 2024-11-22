@@ -604,7 +604,7 @@ ggplot(status.df, aes(x = "", y = Count, fill = Status)) +
   coord_polar("y", start = 0) +
   theme_void() +
   labs(title = "Distribution of Status Desc Values") +
-  eom_text(aes(label = ifelse(Percentage > 5, paste0(Percentage, "%"), "")), 
+  geom_text(aes(label = ifelse(Percentage > 5, paste0(Percentage, "%"), "")), 
             position = position_stack(vjust = 0.5), color = "white", size = 5)
 ```
 
