@@ -125,7 +125,7 @@ mocodes.df <- mocodes.df.dirty %>%
 
 ```{r}
 crmcd.categories <- tibble::tribble(
-  ~Category, ~Code, ~Description,
+  ~Category, ~`Crm Cd`, ~Description,
   "HOMICIDE", 110, "Homicide",
   "HOMICIDE", 113, "Manslaughter",
   "RAPE", 121, "Rape",
@@ -311,14 +311,14 @@ crimes.df[["Part 1-2"]] <- NULL
 
 ```{r}
 missing_codes <- crimes.df %>% 
-  anti_join(crmcd.categories, by = c("Crm Cd" = "Code")) %>% 
+  anti_join(crmcd.categories, by = c("Crm Cd" = "Crm Cd")) %>% 
   select(`Crm Cd`, `Crm Cd Desc`) %>% 
   distinct()
 ```
 
 ```{r}
 missing_categories <- tibble::tribble(
-  ~Category, ~Code, ~Description,
+  ~Category, ~`Crm Cd`, ~Description,
   "PERSONAL THEFT", 354, "THEFT OF IDENTITY",
   "SEX OFFENSES", 812, "CRM AGNST CHLD (13 OR UNDER) (14-15 & SUSP 10 YRS OLDER)",
   "SEX OFFENSES", 956, "LETTERS, LEWD  -  TELEPHONE CALLS, LEWD", 
@@ -397,6 +397,15 @@ missing_categories <- tibble::tribble(
 )
 
 # print(missing_categorie, n = nrow(missing_categorie))
+```
+
+### Join all categories in one table 
+
+```{r}
+categories <- rbind(missing_categories, crmcd.categories)
+#categories
+# categories %>% count(Category)
+#unique(categories$Category)
 ```
 
 ### Joining
@@ -494,9 +503,44 @@ leaflet(crimes.df) %>%
   )
 ```
 
-#### Welche Stadtteile sind besonders betroffen?
+#### Prozentuale Verteilung der Verbrechen pro Stadtteil und Art des Verbrechens
+
+```{r}
+library(tibble)
+library(dplyr)
+library(ggplot2)
+library(ggiraph)
+
+crimes.tib <- as_tibble(crimes.df)
+
+unique(crimes.tib$`AREA NAME`)
+
+crimes.tib <- crimes.tib %>%
+  mutate(`Crm Cd` = as.factor(`Crm Cd`))
+
+crimes.tib <- merge(crimes.tib, categories, by = c("Crm Cd" = "Crm Cd"))
+
+crime_counts <- crimes.tib %>%
+  group_by(`AREA NAME`, `Category`) %>%
+  summarize(count = n()) %>%
+  group_by(`AREA NAME`) %>%
+  mutate(percentage = round(count / sum(count), digits=5)*100)
+
+ggplotly(
+  ggplot(crime_counts, aes(x = `AREA NAME`, y = percentage, fill = `Category`)) +
+    geom_bar(stat = "identity") +
+    labs(title = "Prozentuale Verteilung der Verbrechen pro Stadtteil und Art des Verbrechens",
+         x = "Area Name",
+         y = "Prozentsatz") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+)
+```
 
 #### Welche Stadtteile haben besonders viele Straftaten mit Gang Einfluss?
+
+```{r}
+
+```
 
 #### Gibt es besonders Gefährliche Arten von Orten (\[Premise Desc\])
 
