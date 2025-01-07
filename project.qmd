@@ -202,13 +202,13 @@ crmcd.categories <- tibble::tribble(
 
 Der Datensatz enthält eine Spalte mit MoCodes, welche eine Liste an Zahlen enthält. Diese Zahlen sind IDs des Mocodes Datensatzes, welcher den Modus Operandi als Beschreibung enthält.
 
-#### Datums Format:
+#### Format des Datums
 
 Das Datum ist standardmäßig im Format `MM/DD/YYYY HH:MM:SS AM/PM` angegeben. Jedoch enthalten die Datumsspalten keine Uhrzeit, diese ist, wenn vorhanden, separat angegeben.
 
 #### `Char`fälschlicherweise als Datentyp
 
-Liste an Spalten mit Char als Datentyp
+Die folgenden Datentypen sind fäschlicherweise als Char abgespeichert:
 
 | Spaltenname | Spaltenbeschreibung           | Passender Datentyp |
 |-------------|-------------------------------|--------------------|
@@ -224,9 +224,7 @@ Liste an Spalten mit Char als Datentyp
 In manchen Spalten befinden sich NAs, dazu gehören: - Es existieren NAs in manchen Spalten
 
 -   Weapon
-
 -   Weapon Descd
-
 -   Crime Codes –\> nicht alle Taten
 
 ### Überprüfung Aussagen der Metadaten:
@@ -399,7 +397,7 @@ missing_categories <- tibble::tribble(
 # print(missing_categorie, n = nrow(missing_categorie))
 ```
 
-### Join all categories in one table 
+### Join all categories in one table
 
 ```{r}
 categories <- rbind(missing_categories, crmcd.categories)
@@ -510,6 +508,7 @@ library(tibble)
 library(dplyr)
 library(ggplot2)
 library(ggiraph)
+library(plotly)
 
 crimes.tib <- as_tibble(crimes.df)
 
@@ -539,7 +538,42 @@ ggplotly(
 #### Welche Stadtteile haben besonders viele Straftaten mit Gang Einfluss?
 
 ```{r}
-
+# 
+# ## this is trash todo
+# library(stringr)
+# library(ggplot2)
+# library(plotly)
+# 
+# mocodes.gang <- mocodes.df%>% filter(str_detect(mocodes.df$Beschreibung, "[gG]ang"))
+# mocodes.gang
+# 
+# crimes.per_area <- crimes.df %>%
+#   group_by(`AREA NAME`, `Mocodes`)
+# crimes.per_area
+# 
+# crimes.per_area.gang <- crimes.per_area %>%
+#   inner_join(mocodes.gang, by = c("Mocodes" = "Code"))
+#   group_by(`AREA NAME`, GangType) %>%
+#   summarise(count = n())
+# crimes.per_area.gang
+# 
+# crimes.per_area.gang <- crimes.per_area %>%
+#   inner_join(mocodes.gang, by = c("Mocodes" = "Code")) %>% # join Mocode ! mocodes type = list
+#   group_by(`AREA NAME`, Mocodes) %>%
+#   summarise(count = n())
+# 
+# crime_percentages <- inner_join(crimes.per_area.gang, total_gang_crimes, by = "AREA NAME") %>%
+#   mutate(percentage = (count / total_gang_crimes) * 100)
+# 
+# 
+# ggplotly(
+#   ggplot(crime_percentages, aes(x = `AREA NAME`, y = percentage, fill = GangType)) +
+#     geom_bar(stat = "identity") +
+#     labs(title = "Anteil verschiedener Gangtypen pro Gebiet",
+#          x = "Gebiet",
+#          y = "Anteil (%)") +
+#     theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# )
 ```
 
 #### Gibt es besonders Gefährliche Arten von Orten (\[Premise Desc\])
@@ -610,13 +644,40 @@ ggplot(crimes.df.sex.age, aes(x = Age_Group, y = count, fill = `Vict Sex`)) +
   scale_fill_brewer(palette = "Dark2")  # Color palette for gender fill
 ```
 
-#### Wie häufig werden welche Bevölkerungsgruppen angezeigt / vgl zu wie viele Leute welcher Bevölkerungsgruppe wohnen dort?
-
 ### Zeitliche Analysen
 
 #### Wie hat sich die Kriminalität über die 3 Jahre verändert?
 
-*Jahre zusammen in Time Series Plot* *Jahre in Seasonal Plot vergleichen? (Eine Linie Pro Jahr)* *Slope Chart mit Senkrechten Strichen für Jahre und Slopes für Straftatsklassen*
+- Line mit anzahl der verschiedenen straftaten über die Zeit (36 Monate)
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Monat und Jahr aus DATE OCC extrahieren
+crimes.tib$Month_Year <- format(crimes.tib$`DATE OCC`, "%Y-%m")
+
+# Gruppieren nach Monat und Kategorie
+crimes.per_time <- crimes.tib %>%
+  group_by(Month_Year, Category) %>%
+  summarize(count = n(), .groups = "drop")  # Gruppierung auflösen
+
+crimes.per_time$Month_Year <- factor(crimes.per_time$Month_Year, levels = sort(unique(crimes.per_time$Month_Year)))
+
+ggplotly(ggplot(crimes.per_time, aes(x = Month_Year, y = count, color = Category, group = Category)) +
+  geom_line() +
+  labs(
+    title = "Crimes over Time by Category",
+    x = "Time (Month-Year)",
+    y = "Number of Crimes"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+)
+```
+
+
+
 
 #### Welche Straftaten werden häufig am Anfang/Ende des Monats begangen?
 
