@@ -458,7 +458,7 @@ Hier könne Sie auch geeignete statistische Verfahren bzw. Modellierungen nutzen
     -   Stadtteile mit Gang Gebieten
 
 ```{r}
-
+crimes.tib <- as_tibble(crimes.df)
 ```
 
 ### Ortsabhängige Analysen
@@ -501,35 +501,48 @@ leaflet(crimes.df) %>%
   )
 ```
 
-
 #### Top 15 Kategorien an Straftaten
 
 ```{r}
 library(dplyr)
 library(ggplot2)
+library(plotly)
 
 category_count <- crimes.tib %>%
   group_by(Category) %>%
   summarise(count = n()) %>%
-  arrange(desc(count))  #
+  arrange(desc(count))
 
 top_categories <- category_count %>%
   mutate(Category = ifelse(row_number() <= 15, Category, "Others")) %>%
   group_by(Category) %>%
-  summarise(count = sum(count)) 
+  summarise(count = sum(count)) %>%
+  mutate(percentage = count / sum(count) * 100)
 
-ggplot(top_categories, aes(x = "", y = count, fill = Category)) +
-  geom_bar(stat = "identity", width = 1) + 
-  coord_polar(theta = "y") + 
+p <- ggplot(top_categories, aes(x = "", y = count, fill = Category,
+                              text = paste0(Category, ": ", round(percentage, 1), "%"))) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
   labs(
     title = "Top 15 Categories of Crimes (Others Combined)",
     fill = "Category"
   ) +
-  theme_void() + 
+  theme_void() +
   theme(
-    axis.text.x = element_blank(), 
-    legend.position = "right" 
+    axis.text.x = element_blank(),
+    legend.position = "right"
   )
+
+fig <- plot_ly(top_categories, labels = ~Category, values = ~count, type = 'pie',
+              textposition = 'inside', textinfo = 'percent',
+              hoverinfo = 'text',
+              marker = list(colors = colors, line = list(color = '#FFFFFF', width = 1)))
+
+fig <- fig %>% layout(title = 'Top 15 Categories of Crimes (Others Combined)',
+                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+fig
 
 ```
 
@@ -541,8 +554,6 @@ library(dplyr)
 library(ggplot2)
 library(ggiraph)
 library(plotly)
-
-crimes.tib <- as_tibble(crimes.df)
 
 unique(crimes.tib$`AREA NAME`)
 
