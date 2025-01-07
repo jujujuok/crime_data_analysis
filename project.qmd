@@ -501,6 +501,38 @@ leaflet(crimes.df) %>%
   )
 ```
 
+
+#### Top 15 Kategorien an Straftaten
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+category_count <- crimes.tib %>%
+  group_by(Category) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))  #
+
+top_categories <- category_count %>%
+  mutate(Category = ifelse(row_number() <= 15, Category, "Others")) %>%
+  group_by(Category) %>%
+  summarise(count = sum(count)) 
+
+ggplot(top_categories, aes(x = "", y = count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) + 
+  coord_polar(theta = "y") + 
+  labs(
+    title = "Top 15 Categories of Crimes (Others Combined)",
+    fill = "Category"
+  ) +
+  theme_void() + 
+  theme(
+    axis.text.x = element_blank(), 
+    legend.position = "right" 
+  )
+
+```
+
 #### Prozentuale Verteilung der Verbrechen pro Stadtteil und Art des Verbrechens
 
 ```{r}
@@ -727,9 +759,6 @@ ggplot(top_weapons, aes(x = "", y = count, fill = weapon)) +
   )
 ```
 
-#### Welche Klassen von Straftaten werden wie häufig begangen?
-
-*TreeMap? Klassen als Kategorie und Crm Cd als Unterkategorie*
 
 #### Wie viel Prozent haben zu Verhaftungen (und welcher Art) geführt?
 
