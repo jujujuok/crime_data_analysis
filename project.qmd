@@ -671,15 +671,25 @@ ggplotly(ggplot(crimes.per_time, aes(x = Month_Year, y = count, color = Category
     x = "Time (Month-Year)",
     y = "Number of Crimes"
   ) +
+    scale_x_discrete(
+    breaks = unique(crimes.per_time$Month_Year)[seq(1, length(unique(crimes.per_time$Month_Year)), by = 3)],
+    labels = unique(crimes.per_time$Month_Year)[seq(1, length(unique(crimes.per_time$Month_Year)), by = 3)] 
+  ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 )
+
+# crimes.per_time
 ```
 
+// TO BE Überarbeitet
 
+Man kann hier in dem Plot eine starke Abnahme der Kriminalität vom Januar - Dezember 2021 sehen. 
 
+2020 stieg die Zahl der Schießereien in Los Angeles um 40% im Vergleich zum Vorjahr. Dies war auf den Lockdown, psychische Belastungen und sozialen Stress zurückzuführen.
+Einbrüche nahmen zu, besonders in Wohngebieten, während Geschäfte während des Lockdowns geschlossen waren.
 
-#### Welche Straftaten werden häufig am Anfang/Ende des Monats begangen?
+Nach dem Mord an George Floyd kam es Ende Mai 2020 zu landesweiten Protesten. In Los Angeles gab es sporadische Gewalttätigkeiten, wobei Geschäfte geplündert wurden. 
 
 #### Gibt es zeitliche Rahmen in denen mehr oder weniger Verbrechen geschehen?
 
