@@ -699,7 +699,33 @@ Nach dem Mord an George Floyd kam es Ende Mai 2020 zu landesweiten Protesten. In
 
 #### Welche Arten von Waffen wird am meisten genutzt?
 
-*Waffle Chart für Straftaten*
+```{r}
+library(dplyr)
+library(ggplot2)
+
+weapon_count <- crimes.tib %>%
+  group_by(`Weapon Desc`) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))  
+
+top_weapons <- weapon_count %>%
+  mutate(weapon = ifelse(row_number() <= 10, `Weapon Desc`, "Others")) %>%
+  group_by(weapon) %>%
+  summarise(count = sum(count))
+
+ggplot(top_weapons, aes(x = "", y = count, fill = weapon)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") + 
+  labs(
+    title = "Top 10 Most Used Weapons (Others Combined)",
+    fill = "Weapon"
+  ) +
+  theme_void() + 
+  theme(
+    axis.text.x = element_blank(), 
+    legend.position = "right" 
+  )
+```
 
 #### Welche Klassen von Straftaten werden wie häufig begangen?
 
