@@ -551,39 +551,86 @@ ggplot(crimes.df.sex.age, aes(x = Age_Group, y = count, fill = `Vict Sex`)) +
 
 #### Wie hat sich die Kriminalität über die 3 Jahre verändert?
 
-- Line mit anzahl der verschiedenen straftaten über die Zeit (36 Monate)
-
 ```{r}
 library(ggplot2)
 library(dplyr)
+library(plotly)
 
-# Monat und Jahr aus DATE OCC extrahieren
-crimes.tib$Month_Year <- format(crimes.tib$`DATE OCC`, "%Y-%m")
+# Gesamthäufigkeit je Kategorie berechnen
+top_categories <- crimes.tib %>%
+  group_by(Category) %>%
+  summarize(total_count = n(), .groups = "drop") %>%
+  arrange(desc(total_count)) %>%
+  slice_head(n = 15)  # Die 15 häufigsten Kategorien
+
+# Daten aufteilen in Top 15 und Rest
+top15_data <- crimes.tib %>%
+  filter(Category %in% top_categories$Category)
+
+rest_data <- crimes.tib %>%
+  filter(!Category %in% top_categories$Category)
+
+# Monat und Jahr extrahieren
+top15_data$Month_Year <- format(top15_data$`DATE OCC`, "%Y-%m")
+rest_data$Month_Year <- format(rest_data$`DATE OCC`, "%Y-%m")
 
 # Gruppieren nach Monat und Kategorie
-crimes.per_time <- crimes.tib %>%
+top15_per_time <- top15_data %>%
   group_by(Month_Year, Category) %>%
-  summarize(count = n(), .groups = "drop")  # Gruppierung auflösen
+  summarize(count = n(), .groups = "drop")
 
-crimes.per_time$Month_Year <- factor(crimes.per_time$Month_Year, levels = sort(unique(crimes.per_time$Month_Year)))
+rest_per_time <- rest_data %>%
+  group_by(Month_Year, Category) %>%
+  summarize(count = n(), .groups = "drop")
 
-ggplotly(ggplot(crimes.per_time, aes(x = Month_Year, y = count, color = Category, group = Category)) +
+# Sortiere die Zeitachse
+top15_per_time$Month_Year <- factor(top15_per_time$Month_Year, levels = sort(unique(top15_per_time$Month_Year)))
+rest_per_time$Month_Year <- factor(rest_per_time$Month_Year, levels = sort(unique(rest_per_time$Month_Year)))
+
+# Plot für Top 15 Kategorien
+plot_top15 <- ggplot(top15_per_time, 
+                     aes(x = Month_Year, y = count, color = Category, group = Category)) +
   geom_line() +
   labs(
-    title = "Crimes over Time by Category",
+    title = "Top 15 Crime Categories Over Time",
     x = "Time (Month-Year)",
     y = "Number of Crimes"
   ) +
-    scale_x_discrete(
-    breaks = unique(crimes.per_time$Month_Year)[seq(1, length(unique(crimes.per_time$Month_Year)), by = 3)],
-    labels = unique(crimes.per_time$Month_Year)[seq(1, length(unique(crimes.per_time$Month_Year)), by = 3)] 
+  scale_x_discrete(
+    breaks = unique(top15_per_time$Month_Year)[seq(1, length(unique(top15_per_time$Month_Year)), by = 3)],
+    labels = unique(top15_per_time$Month_Year)[seq(1, length(unique(top15_per_time$Month_Year)), by = 3)]
   ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-)
 
-# crimes.per_time
+# Plot für restliche Kategorien
+plot_rest <- ggplot(rest_per_time, 
+                    aes(x = Month_Year, y = count, color = Category, group = Category)) +
+  geom_line() +
+  labs(
+    title = "Rest of the Crime Categories Over Time",
+    x = "Time (Month-Year)",
+    y = "Number of Crimes"
+  ) +
+  scale_x_discrete(
+    breaks = unique(rest_per_time$Month_Year)[seq(1, length(unique(rest_per_time$Month_Year)), by = 3)],
+    labels = unique(rest_per_time$Month_Year)[seq(1, length(unique(rest_per_time$Month_Year)), by = 3)]
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Interaktive Diagramme mit ggplotly
+plotly_top15 <- ggplotly(plot_top15)
+plotly_rest <- ggplotly(plot_rest)
+
+# Diagramme anzeigen
+plotly_top15
+plotly_rest
+
 ```
+
+
+
 
 // TO BE Überarbeitet
 
