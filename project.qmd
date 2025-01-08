@@ -501,6 +501,19 @@ leaflet(crimes.df) %>%
   )
 ```
 
+### Combine Categories with crimes.tib
+
+```{r}
+unique(crimes.tib$`AREA NAME`)
+
+crimes.tib <- crimes.tib %>%
+  mutate(`Crm Cd` = as.factor(`Crm Cd`))
+
+crimes.tib <- merge(crimes.tib, categories, by = c("Crm Cd" = "Crm Cd"))
+```
+
+
+
 #### Top 15 Kategorien an Straftaten
 
 ```{r}
@@ -509,7 +522,7 @@ library(ggplot2)
 library(plotly)
 
 category_count <- crimes.tib %>%
-  group_by(Category) %>%
+  group_by(`Category`) %>%
   summarise(count = n()) %>%
   arrange(desc(count))
 
@@ -554,13 +567,6 @@ library(dplyr)
 library(ggplot2)
 library(ggiraph)
 library(plotly)
-
-unique(crimes.tib$`AREA NAME`)
-
-crimes.tib <- crimes.tib %>%
-  mutate(`Crm Cd` = as.factor(`Crm Cd`))
-
-crimes.tib <- merge(crimes.tib, categories, by = c("Crm Cd" = "Crm Cd"))
 
 crime_counts <- crimes.tib %>%
   group_by(`AREA NAME`, `Category`) %>%
