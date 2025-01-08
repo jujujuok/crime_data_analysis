@@ -612,9 +612,12 @@ weapon_count <- crimes.tib %>%
   arrange(desc(count))  
 
 top_weapons <- weapon_count %>%
+  filter(!is.na(`Weapon Desc`)) %>%
   mutate(weapon = ifelse(row_number() <= 10, `Weapon Desc`, "Others")) %>%
   group_by(weapon) %>%
   summarise(count = sum(count))
+
+top_weapons$weapon <- factor(top_weapons$weapon, levels = top_weapons$weapon[order(top_weapons$count, decreasing = TRUE)])
 
 ggplot(top_weapons, aes(x = "", y = count, fill = weapon)) +
   geom_bar(stat = "identity", width = 1) +
