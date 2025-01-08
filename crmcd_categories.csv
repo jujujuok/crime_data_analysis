@@ -1,0 +1,68 @@
+Category,Crm Cd,Description
+HOMICIDE,110,Homicide
+HOMICIDE,113,Manslaughter
+RAPE,121,Rape
+RAPE,122,Attempted Rape
+RAPE,815,Sexual Penetration w/ Foreign Object
+RAPE,820,Oral Copulation
+RAPE,821,Sodomy
+ROBBERY,210,Robbery
+ROBBERY,220,Robbery attempted
+AGG. ASSAULTS,230,ADW
+AGG. ASSAULTS,231,ADW against LAPD Police Officer
+AGG. ASSAULTS,235,Child beating
+AGG. ASSAULTS,236,Spousal beating
+AGG. ASSAULTS,250,Shots Fired
+AGG. ASSAULTS,251,Shots fired inhabited dwelling
+AGG. ASSAULTS,761,Brandishing
+AGG. ASSAULTS,926,Train Wrecking
+SIMPLE ASSAULT,435,Lynching
+SIMPLE ASSAULT,436,Lynching attempted
+SIMPLE ASSAULT,437,Resisting Arrest
+SIMPLE ASSAULT,622,Battery on Firefighter
+SIMPLE ASSAULT,623,Battery on Police Officer
+SIMPLE ASSAULT,624,Battery misdemeanor
+SIMPLE ASSAULT,625,Other Misd. Assault
+SIMPLE ASSAULT,626,Spousal/Cohab Abuse - Simple Assault
+SIMPLE ASSAULT,627,Child Abuse - Simple Assault
+SIMPLE ASSAULT,647,Throwing substance at vehicle
+SIMPLE ASSAULT,763,Stalking
+SIMPLE ASSAULT,928,Threatening Phone Calls / Letters
+SIMPLE ASSAULT,930,Criminal Threats
+BURGLARY,310,Burglary
+BURGLARY,320,Burglary attempted
+MVT (GTA),510,Stolen Vehicle
+MVT (GTA),520,Stolen Vehicle attempted
+MVT (GTA),433,DWOC
+BTFV,330,Burg from Vehicle
+BTFV,331,Theft from vehicle - $950.01 & over
+BTFV,410,Burg from Vehicle attempted
+BTFV,420,Theft from vehicle $950 & under
+BTFV,421,Theft from vehicle attempted
+PERSONAL THEFT,350,Theft from person
+PERSONAL THEFT,351,Pursesnatch
+PERSONAL THEFT,352,Pickpocket
+PERSONAL THEFT,353,Drunkroll
+PERSONAL THEFT,450,Theft from person attempted
+PERSONAL THEFT,451,Pursesnatch - attempted
+PERSONAL THEFT,452,Pickpocket - attempted
+PERSONAL THEFT,453,Drunkroll - attempted
+OTHER THEFT,341,Theft-$950.01 & over
+OTHER THEFT,343,Shoplifting - $950.01 & over
+OTHER THEFT,345,Dishonest employee - grand theft
+OTHER THEFT,440,Theft-$950 & under
+OTHER THEFT,441,Theft attempted
+OTHER THEFT,442,Shoplifting - $950 & under
+OTHER THEFT,443,Shoplifting - attempted
+OTHER THEFT,444,Dishonest employee petty theft
+OTHER THEFT,445,Dishonest employee attempted
+OTHER THEFT,470,Till Tap-$950.01 & over
+OTHER THEFT,471,Till Tap-$950 & under
+OTHER THEFT,472,Till Tap attempted
+OTHER THEFT,473,Theft from coin/mc $950.01 & over
+OTHER THEFT,474,Theft from coin m/c $950 & under
+OTHER THEFT,475,Theft from coin m/c attempted
+OTHER THEFT,480,Bicycle stolen
+OTHER THEFT,485,Bicycle attempted stolen
+OTHER THEFT,487,Boat stolen
+OTHER THEFT,491,Boat attempted stolen
