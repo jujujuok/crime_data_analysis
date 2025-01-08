@@ -441,42 +441,54 @@ ggplotly(
 #### Welche Stadtteile haben besonders viele Straftaten mit Gang Einfluss?
 
 ```{r}
-# 
-# ## this is trash todo
-# library(stringr)
-# library(ggplot2)
-# library(plotly)
-# 
-# mocodes.gang <- mocodes.df%>% filter(str_detect(mocodes.df$Beschreibung, "[gG]ang"))
-# mocodes.gang
-# 
-# crimes.per_area <- crimes.df %>%
-#   group_by(`AREA NAME`, `Mocodes`)
-# crimes.per_area
-# 
-# crimes.per_area.gang <- crimes.per_area %>%
-#   inner_join(mocodes.gang, by = c("Mocodes" = "Code"))
-#   group_by(`AREA NAME`, GangType) %>%
-#   summarise(count = n())
-# crimes.per_area.gang
-# 
-# crimes.per_area.gang <- crimes.per_area %>%
-#   inner_join(mocodes.gang, by = c("Mocodes" = "Code")) %>% # join Mocode ! mocodes type = list
-#   group_by(`AREA NAME`, Mocodes) %>%
-#   summarise(count = n())
-# 
-# crime_percentages <- inner_join(crimes.per_area.gang, total_gang_crimes, by = "AREA NAME") %>%
-#   mutate(percentage = (count / total_gang_crimes) * 100)
-# 
-# 
-# ggplotly(
-#   ggplot(crime_percentages, aes(x = `AREA NAME`, y = percentage, fill = GangType)) +
-#     geom_bar(stat = "identity") +
-#     labs(title = "Anteil verschiedener Gangtypen pro Gebiet",
-#          x = "Gebiet",
-#          y = "Anteil (%)") +
-#     theme(axis.text.x = element_text(angle = 45, hjust = 1))
-# )
+library(dplyr)
+library(purrr)
+
+gang_crimes <- crimes.df.joined %>%
+  filter(map_lgl(`MoCd Desc`, ~ any(grepl("[gG]ang", .x)))) %>%
+  group_by(`AREA NAME`) %>%
+  summarise(gang_count = n())
+
+total_crimes <- crimes.df.joined %>%
+  group_by(`AREA NAME`) %>%
+  summarise(total_count = n())
+
+crime_data <- left_join(total_crimes, gang_crimes, by = "AREA NAME") %>%
+  replace_na(list(gang_count = 0))
+
+crime_data <- crime_data %>%
+  mutate(non_gang_count = total_count - gang_count)
+
+crime_data_long <- crime_data %>%
+  select(`AREA NAME`, gang_count, non_gang_count) %>%
+  pivot_longer(
+    cols = -`AREA NAME`,
+    names_to = "crime_type",
+    values_to = "count"
+  )
+
+crime_data_long <- crime_data_long %>%
+  mutate(crime_type = factor(crime_type, levels = c("non_gang_count", "gang_count")))
+
+crime_data_long <- crime_data_long %>%
+  arrange(desc(ifelse(crime_type == "gang_count", count, -Inf))) %>% 
+  mutate(`AREA NAME` = factor(`AREA NAME`, levels = unique(`AREA NAME`)))
+
+ggplot(crime_data_long, aes(x = `AREA NAME`, y = count, fill = crime_type)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(
+    values = c("gang_count" = "steelblue", "non_gang_count" = "gray"),
+    labels = c("Gang-Related", "Non-Gang-Related")
+  ) +
+  labs(
+    title = "Number of Gang-Related vs. Non-Gang-Related Crimes by Area",
+    x = "Area Name",
+    y = "Number of Crimes",
+    fill = "Crime Type"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 ```
 
 #### Gibt es besonders Gefährliche Arten von Orten (\[Premise Desc\])
@@ -664,6 +676,8 @@ top_weapons <- weapon_count %>%
   group_by(weapon) %>%
   summarise(count = sum(count))
 
+top_weapons$percentage <- round((top_weapons$count / sum(top_weapons$count)) * 100, 1)
+
 top_weapons$weapon <- factor(top_weapons$weapon, levels = top_weapons$weapon[order(top_weapons$count, decreasing = TRUE)])
 
 ggplot(top_weapons, aes(x = "", y = count, fill = weapon)) +
@@ -677,7 +691,9 @@ ggplot(top_weapons, aes(x = "", y = count, fill = weapon)) +
   theme(
     axis.text.x = element_blank(), 
     legend.position = "right" 
-  )
+  ) +
+  geom_text(aes(label = ifelse(percentage > 5, paste0(percentage, "%"), "")), 
+          position = position_stack(vjust = 0.5), size = 5)
 ```
 
 
