@@ -319,8 +319,8 @@ crimes.tib <- as_tibble(crimes.df)
 
 ```{r}
 crimes.df.no_id_theft <- subset(crimes.df, `Crm Cd` != 354)
-length(crimes.df.no_id_theft)
-crimes.df.no_id_theft <- crimes.df.no_id_theft[1:5000, ]
+nrow(crimes.df.no_id_theft)
+crimes.df.no_id_theft <- crimes.df.no_id_theft[sample(nrow(crimes.df.no_id_theft), 5000), ]
 ```
 
 ```{r}
@@ -348,10 +348,10 @@ leaflet(crimes.df) %>%
   addHeatmap(
     lng = ~LON,
     lat = ~LAT,
-    intensity = nrow(crimes.df),     # Gewichtung (z.B. Anzahl der Vorfälle, falls vorhanden)
-    blur = 20,          # Blur-Faktor
-    max = 0.05,         # Maximale Intensität
-    radius = 10         # Radius für die Heatmap-Punkte
+    intensity = nrow(crimes.df),
+    blur = 20,
+    max = 0.05,
+    radius = 10
   )
 ```
 
@@ -655,7 +655,34 @@ Nach dem Mord an George Floyd kam es Ende Mai 2020 zu landesweiten Protesten. In
 
 #### Gibt es zeitliche Rahmen in denen mehr oder weniger Verbrechen geschehen?
 
-*Diverging Bars für Stunden/Tage mit Durchschnitt als Mittelwert*
+```{r}
+library(ggplot2)
+
+num_days <- crimes.df.joined %>%
+  summarize(num_days = n_distinct(`DATE OCC`)) %>%
+  pull(num_days)
+
+crimes_by_hour <- crimes.df.joined %>%
+  mutate(time_rounded = round(`TIME OCC` / 100) * 100) %>%
+  group_by(time_rounded) %>%
+  summarize(count = n()) %>%
+  mutate(count = round(count - mean(count), 2)) %>%
+  mutate(lower_higher = ifelse(count < 0, 'lower', 'higher')) %>%
+  mutate(time_rounded = factor(time_rounded, levels = seq(0, 2300, by = 100))) %>%
+  filter(!is.na(time_rounded))
+
+ggplot(crimes_by_hour, aes(x=time_rounded, y=count, label='Straftaten zu Uhrzeit')) +
+  geom_bar(stat = 'identity', aes(fill=lower_higher), width =.5) +
+  scale_fill_manual(name="Anzahl Straftaten", 
+                    labels = c("Über Durchschnitt", "Unter Durchschnitt"), 
+                    values = c("lower"="#00ba38", "higher"="#f8766d")) + 
+  labs(title= "Straftaten nach Uhrzeit",
+       subtitle="Summe der Straftaten zu bestimmten Uhrzeiten", 
+       x = "Uhrzeit (gerundet auf ganze Stunden)",
+       y = "Durchschnittliche tägliche Differenz zum Durchschnitt der Uhrzeiten") +
+  coord_flip() +
+  theme_bw()
+```
 
 ### Analysen der Straftaten
 
