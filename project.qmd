@@ -272,6 +272,10 @@ categories <- rbind(missing_categories, crmcd.categories)
 # unique(categories$Category)
 ```
 
+```{r}
+rm(missing_codes, codes_to_numeric, missing_categories, crmcd.categories)
+```
+
 ### Joining
 
 -   MO & Tabelle
@@ -360,6 +364,10 @@ leaflet(crimes.df) %>%
   )
 ```
 
+```{r}
+rm(crimes.df.no_id_theft)
+```
+
 ### Combine Categories with crimes.tib
 
 ```{r}
@@ -419,6 +427,11 @@ fig <- fig %>% layout(
 fig
 ```
 
+
+```{r}
+rm(category_count, top_categories, p, fig)
+```
+
 #### Prozentuale Verteilung der Verbrechen pro Stadtteil und Art des Verbrechens
 
 ```{r}
@@ -440,6 +453,10 @@ ggplotly(
 )
 ```
 
+
+```{r}
+rm(crime_counts)
+```
 #### Welche Stadtteile haben besonders viele Straftaten mit Gang Einfluss?
 
 ```{r}
@@ -489,6 +506,10 @@ ggplot(crime_data_long, aes(x = `AREA NAME`, y = count, fill = crime_type)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+```{r}
+rm(gang_crimes, total_crimes, crime_data, crime_data_long)
+```
+
 #### Gibt es besonders Gefährliche Arten von Orten (\[Premise Desc\])
 
 ```{r}
@@ -525,6 +546,9 @@ ggplot(
   theme(axis.text.x = element_text(angle = 65, vjust = 0.6))
 ```
 
+```{r}
+rm(premis.grouped)
+```
 ### Personenabhängige Analysen
 
 #### Welche Bevölkerungsgruppe ist am meisten gefährdet? (Abhängig von Alter, Geschlecht, Abstammung)
@@ -570,6 +594,9 @@ ggplot(crimes.df.sex.age, aes(x = Age_Group, y = count, fill = `Vict Sex`)) +
   scale_fill_brewer(palette = "Dark2") # Color palette for gender fill
 ```
 
+```{r}
+rm(crimes.df.sex.age, brks, lbls)
+```
 ### Zeitliche Analysen
 
 #### Wie hat sich die Kriminalität über die 3 Jahre verändert?
@@ -662,6 +689,10 @@ Einbrüche nahmen zu, besonders in Wohngebieten, während Geschäfte während de
 
 Nach dem Mord an George Floyd kam es Ende Mai 2020 zu landesweiten Protesten. In Los Angeles gab es sporadische Gewalttätigkeiten, wobei Geschäfte geplündert wurden. 
 
+```{r}
+rm(top_categories, top15_data, rest_data, top15_per_time, rest_per_time, plot_top15, plot_rest, plotly_top15, plotly_rest)
+```
+
 #### Gibt es zeitliche Rahmen in denen mehr oder weniger Verbrechen geschehen?
 
 ```{r}
@@ -695,6 +726,10 @@ ggplot(crimes_by_hour, aes(x = time_rounded, y = count, label = "Straftaten zu U
   theme_bw()
 ```
 
+
+```{r}
+rm(num_days, crimes_by_hour)
+```
 ### Analysen der Straftaten
 
 #### Welche Arten von Waffen wird am meisten genutzt?
@@ -732,6 +767,9 @@ ggplot(top_weapons, aes(x = "", y = count, fill = weapon)) +
   )
 ```
 
+```{r}
+rm(weapon_count, top_weapons)
+```
 
 #### Wie viel Prozent haben zu Verhaftungen (und welcher Art) geführt?
 
@@ -748,8 +786,12 @@ ggplot(status.df, aes(x = "", y = Count, fill = Status)) +
   theme_void() +
   labs(title = "Distribution of Status Desc Values") +
   geom_text(aes(label = ifelse(Percentage > 5, paste0(Percentage, "%"), "")),
-    position = position_stack(vjust = 0.5), color = "white", size = 5
+    position = position_stack(vjust = 0.5), size = 5
   )
+```
+
+```{r}
+rm(status.df)
 ```
 
 #### Wie effektiv ist die LAPD bei der Aufklärung verschiedener Arten von Straftaten?
