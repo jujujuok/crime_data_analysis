@@ -73,6 +73,22 @@ Definieren Sie eine Sie interessierende bzw. interessante Fragestellung im Zusam
 
 ## 2. Laden der Daten
 
+```{r}
+library(tibble)
+library(readr)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(purrr)
+library(leaflet)
+library(leaflet.extras)
+library(plotly)
+library(ggiraph)
+library(forcats)
+library(stringr)
+```
+
 ::: {.callout-note icon="false"}
 ## Aufgabenstellung (10 Pkt.)
 
@@ -92,8 +108,6 @@ Beschreiben Sie, was Sie tun müssen, bevor Sie die Daten im nächsten Abschnitt
 ```{r}
 rm(list = ls())
 
-# Laden der Daten
-library(readr)
 crimes.df.raw <- read_csv("Crime_Data_from_2020_to_Present.csv")
 head(crimes.df.raw)
 
@@ -104,10 +118,6 @@ sapply(crimes.df.raw, class)
 ### Einlesen der Modus Operandi Codes
 
 ```{r}
-library(tidyr)
-library(dplyr)
-library(ggthemes)
-
 mocodes.df.dirty <- read_delim("MO_CODES_Numerical_20191119.txt",
   delim = "\\s+",
   col_names = c("CodeBeschreibung"),
@@ -267,8 +277,6 @@ categories <- rbind(missing_categories, crmcd.categories)
 -   MO & Tabelle
 
 ```{r}
-library(purrr)
-
 crimes.df.joined <- crimes.df %>%
   mutate(`MoCd Desc` = map(Mocodes, ~ mocodes.df$Beschreibung[match(.x, mocodes.df$Code)])) %>%
   relocate(`MoCd Desc`, .after = `Mocodes`)
@@ -326,10 +334,6 @@ crimes.df.no_id_theft <- crimes.df.no_id_theft[sample(nrow(crimes.df.no_id_theft
 ```
 
 ```{r}
-# Bibliothek laden
-library(leaflet)
-
-# Eine interaktive OpenStreetMap-Karte erstellen
 leaflet(crimes.df.no_id_theft) %>%
   addTiles() %>% # Standard-OSM-Karte
   setView(lng = -118.2437, lat = 34.0522, zoom = 9) %>% # Ansicht auf Los Angeles
@@ -343,8 +347,6 @@ leaflet(crimes.df.no_id_theft) %>%
 ```
 
 ```{r}
-library(leaflet.extras)
-
 leaflet(crimes.df) %>%
   addTiles() %>% # Grundkarte hinzufügen
   setView(lng = -118.2437, lat = 34.0522, zoom = 9) %>%
@@ -374,10 +376,6 @@ crimes.tib <- merge(crimes.tib, categories, by = c("Crm Cd" = "Crm Cd"))
 #### Top 15 Kategorien an Straftaten
 
 ```{r}
-library(dplyr)
-library(ggplot2)
-library(plotly)
-
 category_count <- crimes.tib %>%
   group_by(`Category`) %>%
   summarise(count = n()) %>%
@@ -424,12 +422,6 @@ fig
 #### Prozentuale Verteilung der Verbrechen pro Stadtteil und Art des Verbrechens
 
 ```{r}
-library(tibble)
-library(dplyr)
-library(ggplot2)
-library(ggiraph)
-library(plotly)
-
 crime_counts <- crimes.tib %>%
   group_by(`AREA NAME`, `Category`) %>%
   summarize(count = n()) %>%
@@ -451,9 +443,6 @@ ggplotly(
 #### Welche Stadtteile haben besonders viele Straftaten mit Gang Einfluss?
 
 ```{r}
-library(dplyr)
-library(purrr)
-
 gang_crimes <- crimes.df.joined %>%
   filter(map_lgl(`MoCd Desc`, ~ any(grepl("[gG]ang", .x)))) %>%
   group_by(`AREA NAME`) %>%
@@ -503,11 +492,6 @@ ggplot(crime_data_long, aes(x = `AREA NAME`, y = count, fill = crime_type)) +
 #### Gibt es besonders Gefährliche Arten von Orten (\[Premise Desc\])
 
 ```{r}
-library(ggplot2)
-library(dplyr)
-library(forcats)
-library(stringr)
-
 premis.grouped <- crimes.df %>%
   group_by(`Premis Cd`, `Premis Desc`) %>%
   summarise(count = n() / 1000) %>%
@@ -591,11 +575,6 @@ ggplot(crimes.df.sex.age, aes(x = Age_Group, y = count, fill = `Vict Sex`)) +
 #### Wie hat sich die Kriminalität über die 3 Jahre verändert?
 
 ```{r}
-library(ggplot2)
-library(dplyr)
-library(plotly)
-
-# Gesamthäufigkeit je Kategorie berechnen
 top_categories <- crimes.tib %>%
   group_by(Category) %>%
   summarize(total_count = n(), .groups = "drop") %>%
@@ -686,8 +665,6 @@ Nach dem Mord an George Floyd kam es Ende Mai 2020 zu landesweiten Protesten. In
 #### Gibt es zeitliche Rahmen in denen mehr oder weniger Verbrechen geschehen?
 
 ```{r}
-library(ggplot2)
-
 num_days <- crimes.df.joined %>%
   summarize(num_days = n_distinct(`DATE OCC`)) %>%
   pull(num_days)
@@ -723,9 +700,6 @@ ggplot(crimes_by_hour, aes(x = time_rounded, y = count, label = "Straftaten zu U
 #### Welche Arten von Waffen wird am meisten genutzt?
 
 ```{r}
-library(dplyr)
-library(ggplot2)
-
 weapon_count <- crimes.tib %>%
   group_by(`Weapon Desc`) %>%
   summarise(count = n()) %>%
