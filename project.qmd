@@ -90,11 +90,11 @@ Beschreiben Sie, was Sie tun müssen, bevor Sie die Daten im nächsten Abschnitt
 :::
 
 ```{r}
-rm(list=ls())
+rm(list = ls())
 
 # Laden der Daten
 library(readr)
-crimes.df.raw <- read_csv('Crime_Data_from_2020_to_Present.csv') 
+crimes.df.raw <- read_csv("Crime_Data_from_2020_to_Present.csv")
 head(crimes.df.raw)
 
 # Welche Typen sind enthalten?
@@ -109,22 +109,24 @@ library(dplyr)
 library(ggthemes)
 
 mocodes.df.dirty <- read_delim("MO_CODES_Numerical_20191119.txt",
-                 delim = "\\s+",
-                 col_names = c("CodeBeschreibung"),
-                 trim_ws = TRUE)
+  delim = "\\s+",
+  col_names = c("CodeBeschreibung"),
+  trim_ws = TRUE
+)
 
 mocodes.df <- mocodes.df.dirty %>%
   separate(CodeBeschreibung,
-           into = c("Code", "Beschreibung"),
-           sep = "(?<=[0-9])\\s+",
-           extra = "merge") %>%
-  mutate(Code = as.integer(Code)) 
+    into = c("Code", "Beschreibung"),
+    sep = "(?<=[0-9])\\s+",
+    extra = "merge"
+  ) %>%
+  mutate(Code = as.integer(Code))
 ```
 
 ### Hinzufügen von Straftat Klassifikation
 
 ```{r}
-crmcd.categories <- read_csv('crmcd_categories.csv')
+crmcd.categories <- read_csv("crmcd_categories.csv")
 ```
 
 ### Analyse Rohdaten
@@ -208,13 +210,13 @@ codes_to_numeric <- function(x) {
 
 # Transformation der Daten zu sinnvollen Datentypen
 crimes.df <- transform(crimes.df.raw,
-    `Date Rptd` = as.Date(substr(`Date Rptd`, 1, 10), format = "%m/%d/%Y"),
-    `DATE OCC` = as.Date(substr(`DATE OCC`, 1, 10), format = "%m/%d/%Y"),
-    `TIME OCC` = as.integer(`TIME OCC`),
-    `AREA` = as.integer(`AREA`),
-    `Rpt Dist No` = as.integer(`Rpt Dist No`),
-    `Crm Cd` = as.integer(`Crm Cd`),
-    `Mocodes` = lapply(Mocodes, codes_to_numeric)
+  `Date Rptd` = as.Date(substr(`Date Rptd`, 1, 10), format = "%m/%d/%Y"),
+  `DATE OCC` = as.Date(substr(`DATE OCC`, 1, 10), format = "%m/%d/%Y"),
+  `TIME OCC` = as.integer(`TIME OCC`),
+  `AREA` = as.integer(`AREA`),
+  `Rpt Dist No` = as.integer(`Rpt Dist No`),
+  `Crm Cd` = as.integer(`Crm Cd`),
+  `Mocodes` = lapply(Mocodes, codes_to_numeric)
 )
 ```
 
@@ -239,14 +241,14 @@ crimes.df[["Part 1-2"]] <- NULL
 #### In Klassifizierung der Straftaten sind nicht alle Straftaten enthalten
 
 ```{r}
-missing_codes <- crimes.df %>% 
-  anti_join(crmcd.categories, by = c("Crm Cd" = "Crm Cd")) %>% 
-  select(`Crm Cd`, `Crm Cd Desc`) %>% 
+missing_codes <- crimes.df %>%
+  anti_join(crmcd.categories, by = c("Crm Cd" = "Crm Cd")) %>%
+  select(`Crm Cd`, `Crm Cd Desc`) %>%
   distinct()
 ```
 
 ```{r}
-missing_categories <- read_csv('missing_categories.csv')
+missing_categories <- read_csv("missing_categories.csv")
 
 # print(missing_categorie, n = nrow(missing_categorie))
 ```
@@ -255,9 +257,9 @@ missing_categories <- read_csv('missing_categories.csv')
 
 ```{r}
 categories <- rbind(missing_categories, crmcd.categories)
-#categories
+# categories
 # categories %>% count(Category)
-#unique(categories$Category)
+# unique(categories$Category)
 ```
 
 ### Joining
@@ -267,7 +269,7 @@ categories <- rbind(missing_categories, crmcd.categories)
 ```{r}
 library(purrr)
 
-crimes.df.joined <- crimes.df %>% 
+crimes.df.joined <- crimes.df %>%
   mutate(`MoCd Desc` = map(Mocodes, ~ mocodes.df$Beschreibung[match(.x, mocodes.df$Code)])) %>%
   relocate(`MoCd Desc`, .after = `Mocodes`)
 
@@ -329,21 +331,22 @@ library(leaflet)
 
 # Eine interaktive OpenStreetMap-Karte erstellen
 leaflet(crimes.df.no_id_theft) %>%
-  addTiles() %>%  # Standard-OSM-Karte
-  setView(lng = -118.2437, lat = 34.0522, zoom = 9) %>%  # Ansicht auf Los Angeles
-  addCircleMarkers(~LON, ~LAT, 
-                   radius = 5, 
-                   color = "blue", 
-                   stroke = FALSE, 
-                   fillOpacity = 0.8, 
-                   popup = ~paste("ID:", `Crm Cd Desc`))  # Popup mit der DR_NO ID
+  addTiles() %>% # Standard-OSM-Karte
+  setView(lng = -118.2437, lat = 34.0522, zoom = 9) %>% # Ansicht auf Los Angeles
+  addCircleMarkers(~LON, ~LAT,
+    radius = 5,
+    color = "blue",
+    stroke = FALSE,
+    fillOpacity = 0.8,
+    popup = ~ paste("ID:", `Crm Cd Desc`)
+  ) # Popup mit der DR_NO ID
 ```
 
 ```{r}
 library(leaflet.extras)
 
 leaflet(crimes.df) %>%
-  addTiles() %>%  # Grundkarte hinzufügen
+  addTiles() %>% # Grundkarte hinzufügen
   setView(lng = -118.2437, lat = 34.0522, zoom = 9) %>%
   addHeatmap(
     lng = ~LON,
@@ -386,8 +389,10 @@ top_categories <- category_count %>%
   summarise(count = sum(count)) %>%
   mutate(percentage = count / sum(count) * 100)
 
-p <- ggplot(top_categories, aes(x = "", y = count, fill = Category,
-                              text = paste0(Category, ": ", round(percentage, 1), "%"))) +
+p <- ggplot(top_categories, aes(
+  x = "", y = count, fill = Category,
+  text = paste0(Category, ": ", round(percentage, 1), "%")
+)) +
   geom_bar(stat = "identity", width = 1) +
   coord_polar(theta = "y") +
   labs(
@@ -400,17 +405,20 @@ p <- ggplot(top_categories, aes(x = "", y = count, fill = Category,
     legend.position = "right"
   )
 
-fig <- plot_ly(top_categories, labels = ~Category, values = ~count, type = 'pie',
-              textposition = 'inside', textinfo = 'percent',
-              hoverinfo = 'text',
-              marker = list(colors = colors, line = list(color = '#FFFFFF', width = 1)))
+fig <- plot_ly(top_categories,
+  labels = ~Category, values = ~count, type = "pie",
+  textposition = "inside", textinfo = "percent",
+  hoverinfo = "text",
+  marker = list(colors = colors, line = list(color = "#FFFFFF", width = 1))
+)
 
-fig <- fig %>% layout(title = 'Top 15 Categories of Crimes (Others Combined)',
-                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+fig <- fig %>% layout(
+  title = "Top 15 Categories of Crimes (Others Combined)",
+  xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+  yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)
+)
 
 fig
-
 ```
 
 #### Prozentuale Verteilung der Verbrechen pro Stadtteil und Art des Verbrechens
@@ -426,14 +434,16 @@ crime_counts <- crimes.tib %>%
   group_by(`AREA NAME`, `Category`) %>%
   summarize(count = n()) %>%
   group_by(`AREA NAME`) %>%
-  mutate(percentage = round(count / sum(count), digits=5)*100)
+  mutate(percentage = round(count / sum(count), digits = 5) * 100)
 
 ggplotly(
   ggplot(crime_counts, aes(x = `AREA NAME`, y = percentage, fill = `Category`)) +
     geom_bar(stat = "identity") +
-    labs(title = "Prozentuale Verteilung der Verbrechen pro Stadtteil und Art des Verbrechens",
-         x = "Area Name",
-         y = "Prozentsatz") +
+    labs(
+      title = "Prozentuale Verteilung der Verbrechen pro Stadtteil und Art des Verbrechens",
+      x = "Area Name",
+      y = "Prozentsatz"
+    ) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 )
 ```
@@ -471,7 +481,7 @@ crime_data_long <- crime_data_long %>%
   mutate(crime_type = factor(crime_type, levels = c("non_gang_count", "gang_count")))
 
 crime_data_long <- crime_data_long %>%
-  arrange(desc(ifelse(crime_type == "gang_count", count, -Inf))) %>% 
+  arrange(desc(ifelse(crime_type == "gang_count", count, -Inf))) %>%
   mutate(`AREA NAME` = factor(`AREA NAME`, levels = unique(`AREA NAME`)))
 
 ggplot(crime_data_long, aes(x = `AREA NAME`, y = count, fill = crime_type)) +
@@ -488,40 +498,47 @@ ggplot(crime_data_long, aes(x = `AREA NAME`, y = count, fill = crime_type)) +
   ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
 ```
 
 #### Gibt es besonders Gefährliche Arten von Orten (\[Premise Desc\])
 
 ```{r}
-library(ggplot2) 
-library(dplyr) 
-library(forcats) 
+library(ggplot2)
+library(dplyr)
+library(forcats)
 library(stringr)
 
-premis.grouped <- crimes.df %>% 
-  group_by(`Premis Cd`, `Premis Desc`) %>% 
-  summarise(count = n()/1000) %>% 
+premis.grouped <- crimes.df %>%
+  group_by(`Premis Cd`, `Premis Desc`) %>%
+  summarise(count = n() / 1000) %>%
   arrange(desc(count)) %>%
   ungroup() %>%
-  #Remove parenthesis from descriptions 
+  # Remove parenthesis from descriptions
   mutate(`Premis Desc` = gsub("\\s*\\([^\\)]+\\)", "", `Premis Desc`))
 
-ggplot(premis.grouped[1:20,], 
-       aes(x=fct_reorder(`Premis Desc`, count, .desc = T), 
-                                  y=`count`)) + 
-  geom_point(size=3) + 
-  geom_segment(aes(x=`Premis Desc`, 
-                   xend=`Premis Desc`, 
-                   y=0, 
-                   yend=`count`)) + 
-  labs(title="Straftaten an Orten", 
-       subtitle="Anzahl an Straftaten an einer bestimmten Art von Ort", 
-       x = "Ortstype", 
-       y = "Anzahl der Straftaten [in Tsd.]") + 
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 20)) + 
-  theme_tufte() +  # Minimal Tufte theme
-  theme(axis.text.x = element_text(angle = 65, vjust=0.6))
+ggplot(
+  premis.grouped[1:20, ],
+  aes(
+    x = fct_reorder(`Premis Desc`, count, .desc = T),
+    y = `count`
+  )
+) +
+  geom_point(size = 3) +
+  geom_segment(aes(
+    x = `Premis Desc`,
+    xend = `Premis Desc`,
+    y = 0,
+    yend = `count`
+  )) +
+  labs(
+    title = "Straftaten an Orten",
+    subtitle = "Anzahl an Straftaten an einer bestimmten Art von Ort",
+    x = "Ortstype",
+    y = "Anzahl der Straftaten [in Tsd.]"
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 20)) +
+  theme_tufte() + # Minimal Tufte theme
+  theme(axis.text.x = element_text(angle = 65, vjust = 0.6))
 ```
 
 ### Personenabhängige Analysen
@@ -531,32 +548,42 @@ ggplot(premis.grouped[1:20,],
 ```{r}
 # Filter and summarize the data with age groups
 crimes.df.sex.age <- crimes.df %>%
-  filter(`Vict Sex` %in% c('M', 'F'), `Vict Age` >= 1) %>%
-  mutate(Age_Group = cut(`Vict Age`, breaks = seq(0, max(`Vict Age`, na.rm = TRUE) + 5, 5), 
-                         labels = paste(seq(1, max(`Vict Age`, na.rm = TRUE), by = 5),
-                                        seq(5, max(`Vict Age`, na.rm = TRUE) + 4, by = 5), sep = "-"),
-                         include.lowest = TRUE)) %>%
+  filter(`Vict Sex` %in% c("M", "F"), `Vict Age` >= 1) %>%
+  mutate(Age_Group = cut(`Vict Age`,
+    breaks = seq(0, max(`Vict Age`, na.rm = TRUE) + 5, 5),
+    labels = paste(seq(1, max(`Vict Age`, na.rm = TRUE), by = 5),
+      seq(5, max(`Vict Age`, na.rm = TRUE) + 4, by = 5),
+      sep = "-"
+    ),
+    include.lowest = TRUE
+  )) %>%
   group_by(Age_Group, `Vict Sex`) %>%
   summarise(count = n()) %>%
   ungroup()
 
 # Define custom y-axis breaks for symmetrical pyramid
-brks <- seq(-50000, 50000, by = 10000)  # Custom breaks every 10000 up to 50000
-lbls <- abs(brks)  # Use absolute values for labels
+brks <- seq(-50000, 50000, by = 10000) # Custom breaks every 10000 up to 50000
+lbls <- abs(brks) # Use absolute values for labels
 
 # Create the pyramid plot
-ggplot(crimes.df.sex.age, aes(x = Age_Group, y = count, fill = `Vict Sex`)) + 
-  geom_bar(data = subset(crimes.df.sex.age, `Vict Sex` == "M"), 
-           aes(y = -count), stat = "identity", width = 0.6) +  # Left side for males
-  geom_bar(data = subset(crimes.df.sex.age, `Vict Sex` == "F"), 
-           stat = "identity", width = 0.6) +  # Right side for females
-  scale_y_continuous(breaks = brks, labels = lbls) +  # Custom y-axis breaks and labels
-  coord_flip() +  # Flip axes for pyramid layout
+ggplot(crimes.df.sex.age, aes(x = Age_Group, y = count, fill = `Vict Sex`)) +
+  geom_bar(
+    data = subset(crimes.df.sex.age, `Vict Sex` == "M"),
+    aes(y = -count), stat = "identity", width = 0.6
+  ) + # Left side for males
+  geom_bar(
+    data = subset(crimes.df.sex.age, `Vict Sex` == "F"),
+    stat = "identity", width = 0.6
+  ) + # Right side for females
+  scale_y_continuous(breaks = brks, labels = lbls) + # Custom y-axis breaks and labels
+  coord_flip() + # Flip axes for pyramid layout
   labs(title = "Victim Age Distribution by Sex") +
-  theme_tufte() +  # Minimal Tufte theme
-  theme(plot.title = element_text(hjust = .5), 
-        axis.ticks = element_blank()) +   # Center plot title and remove axis ticks
-  scale_fill_brewer(palette = "Dark2")  # Color palette for gender fill
+  theme_tufte() + # Minimal Tufte theme
+  theme(
+    plot.title = element_text(hjust = .5),
+    axis.ticks = element_blank()
+  ) + # Center plot title and remove axis ticks
+  scale_fill_brewer(palette = "Dark2") # Color palette for gender fill
 ```
 
 ### Zeitliche Analysen
@@ -573,7 +600,7 @@ top_categories <- crimes.tib %>%
   group_by(Category) %>%
   summarize(total_count = n(), .groups = "drop") %>%
   arrange(desc(total_count)) %>%
-  slice_head(n = 15)  # Die 15 häufigsten Kategorien
+  slice_head(n = 15) # Die 15 häufigsten Kategorien
 
 # Daten aufteilen in Top 15 und Rest
 top15_data <- crimes.tib %>%
@@ -600,8 +627,10 @@ top15_per_time$Month_Year <- factor(top15_per_time$Month_Year, levels = sort(uni
 rest_per_time$Month_Year <- factor(rest_per_time$Month_Year, levels = sort(unique(rest_per_time$Month_Year)))
 
 # Plot für Top 15 Kategorien
-plot_top15 <- ggplot(top15_per_time, 
-                     aes(x = Month_Year, y = count, color = Category, group = Category)) +
+plot_top15 <- ggplot(
+  top15_per_time,
+  aes(x = Month_Year, y = count, color = Category, group = Category)
+) +
   geom_line() +
   labs(
     title = "Top 15 Crime Categories Over Time",
@@ -616,8 +645,10 @@ plot_top15 <- ggplot(top15_per_time,
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # Plot für restliche Kategorien
-plot_rest <- ggplot(rest_per_time, 
-                    aes(x = Month_Year, y = count, color = Category, group = Category)) +
+plot_rest <- ggplot(
+  rest_per_time,
+  aes(x = Month_Year, y = count, color = Category, group = Category)
+) +
   geom_line() +
   labs(
     title = "Rest of the Crime Categories Over Time",
@@ -638,7 +669,6 @@ plotly_rest <- ggplotly(plot_rest)
 # Diagramme anzeigen
 plotly_top15
 plotly_rest
-
 ```
 
 
@@ -667,19 +697,23 @@ crimes_by_hour <- crimes.df.joined %>%
   group_by(time_rounded) %>%
   summarize(count = n()) %>%
   mutate(count = round(count - mean(count), 2)) %>%
-  mutate(lower_higher = ifelse(count < 0, 'lower', 'higher')) %>%
+  mutate(lower_higher = ifelse(count < 0, "lower", "higher")) %>%
   mutate(time_rounded = factor(time_rounded, levels = seq(0, 2300, by = 100))) %>%
   filter(!is.na(time_rounded))
 
-ggplot(crimes_by_hour, aes(x=time_rounded, y=count, label='Straftaten zu Uhrzeit')) +
-  geom_bar(stat = 'identity', aes(fill=lower_higher), width =.5) +
-  scale_fill_manual(name="Anzahl Straftaten", 
-                    labels = c("Über Durchschnitt", "Unter Durchschnitt"), 
-                    values = c("lower"="#00ba38", "higher"="#f8766d")) + 
-  labs(title= "Straftaten nach Uhrzeit",
-       subtitle="Summe der Straftaten zu bestimmten Uhrzeiten", 
-       x = "Uhrzeit (gerundet auf ganze Stunden)",
-       y = "Durchschnittliche tägliche Differenz zum Durchschnitt der Uhrzeiten") +
+ggplot(crimes_by_hour, aes(x = time_rounded, y = count, label = "Straftaten zu Uhrzeit")) +
+  geom_bar(stat = "identity", aes(fill = lower_higher), width = .5) +
+  scale_fill_manual(
+    name = "Anzahl Straftaten",
+    labels = c("Über Durchschnitt", "Unter Durchschnitt"),
+    values = c("lower" = "#00ba38", "higher" = "#f8766d")
+  ) +
+  labs(
+    title = "Straftaten nach Uhrzeit",
+    subtitle = "Summe der Straftaten zu bestimmten Uhrzeiten",
+    x = "Uhrzeit (gerundet auf ganze Stunden)",
+    y = "Durchschnittliche tägliche Differenz zum Durchschnitt der Uhrzeiten"
+  ) +
   coord_flip() +
   theme_bw()
 ```
@@ -695,7 +729,7 @@ library(ggplot2)
 weapon_count <- crimes.tib %>%
   group_by(`Weapon Desc`) %>%
   summarise(count = n()) %>%
-  arrange(desc(count))  
+  arrange(desc(count))
 
 top_weapons <- weapon_count %>%
   filter(!is.na(`Weapon Desc`)) %>%
@@ -709,25 +743,26 @@ top_weapons$weapon <- factor(top_weapons$weapon, levels = top_weapons$weapon[ord
 
 ggplot(top_weapons, aes(x = "", y = count, fill = weapon)) +
   geom_bar(stat = "identity", width = 1) +
-  coord_polar(theta = "y") + 
+  coord_polar(theta = "y") +
   labs(
     title = "Top 10 Most Used Weapons (Others Combined)",
     fill = "Weapon"
   ) +
-  theme_void() + 
+  theme_void() +
   theme(
-    axis.text.x = element_blank(), 
-    legend.position = "right" 
+    axis.text.x = element_blank(),
+    legend.position = "right"
   ) +
-  geom_text(aes(label = ifelse(percentage > 5, paste0(percentage, "%"), "")), 
-          position = position_stack(vjust = 0.5), size = 5)
+  geom_text(aes(label = ifelse(percentage > 5, paste0(percentage, "%"), "")),
+    position = position_stack(vjust = 0.5), size = 5
+  )
 ```
 
 
 #### Wie viel Prozent haben zu Verhaftungen (und welcher Art) geführt?
 
 ```{r}
-status.df <-  as.data.frame(table(crimes.df$`Status Desc`))
+status.df <- as.data.frame(table(crimes.df$`Status Desc`))
 colnames(status.df) <- c("Status", "Count")
 
 status.df$Percentage <- round((status.df$Count / sum(status.df$Count)) * 100, 1)
@@ -738,8 +773,9 @@ ggplot(status.df, aes(x = "", y = Count, fill = Status)) +
   coord_polar("y", start = 0) +
   theme_void() +
   labs(title = "Distribution of Status Desc Values") +
-  geom_text(aes(label = ifelse(Percentage > 5, paste0(Percentage, "%"), "")), 
-            position = position_stack(vjust = 0.5), color = "white", size = 5)
+  geom_text(aes(label = ifelse(Percentage > 5, paste0(Percentage, "%"), "")),
+    position = position_stack(vjust = 0.5), color = "white", size = 5
+  )
 ```
 
 #### Wie effektiv ist die LAPD bei der Aufklärung verschiedener Arten von Straftaten?
