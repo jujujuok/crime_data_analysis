@@ -239,14 +239,18 @@ length(crmCd.diff)
 # Überprüfen, ob die Spalte nur NAs enthält
 if (all(is.na(crimes.df[["Crm Cd 4"]]))) {
   crimes.df[["Crm Cd 4"]] <- NULL
+  print("Spalte Crm Cd 4 wurde entfernt, da sie keine Werte enthält.")
 }
 ```
 
+
+
 ```{r}
 # Löschen von Part 1-2
-# Todo Begründung
 crimes.df[["Part 1-2"]] <- NULL
 ```
+
+Die Spalte 'Part 1-2' hat keine offizielle Beschreibung und wir konnten ihr keine Bedeutung zuordnen, weshalb sie entfernt wird.
 
 #### In Klassifizierung der Straftaten sind nicht alle Straftaten enthalten
 
@@ -259,18 +263,15 @@ missing_codes <- crimes.df %>%
 
 ```{r}
 missing_categories <- read_csv("missing_categories.csv")
-
-# print(missing_categorie, n = nrow(missing_categorie))
 ```
 
 ### Join all categories in one table
 
 ```{r}
 categories <- rbind(missing_categories, crmcd.categories)
-# categories
-# categories %>% count(Category)
-# unique(categories$Category)
 ```
+
+Dem Datensatz wurden `r length(unique(categories$Category))` Kategorien an Verbrechen zugeordnet
 
 ```{r}
 rm(missing_codes, codes_to_numeric, missing_categories, crmcd.categories)
@@ -347,7 +348,7 @@ leaflet(crimes.df.no_id_theft) %>%
     stroke = FALSE,
     fillOpacity = 0.8,
     popup = ~ paste("ID:", `Crm Cd Desc`)
-  ) # Popup mit der DR_NO ID
+  ) 
 ```
 
 ```{r}
@@ -542,7 +543,7 @@ ggplot(
     y = "Anzahl der Straftaten [in Tsd.]"
   ) +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 20)) +
-  theme_tufte() + # Minimal Tufte theme
+  theme_tufte() +
   theme(axis.text.x = element_text(angle = 65, vjust = 0.6))
 ```
 
@@ -570,28 +571,27 @@ crimes.df.sex.age <- crimes.df %>%
   ungroup()
 
 # Define custom y-axis breaks for symmetrical pyramid
-brks <- seq(-50000, 50000, by = 10000) # Custom breaks every 10000 up to 50000
-lbls <- abs(brks) # Use absolute values for labels
+brks <- seq(-50000, 50000, by = 10000)
+lbls <- abs(brks)
 
-# Create the pyramid plot
 ggplot(crimes.df.sex.age, aes(x = Age_Group, y = count, fill = `Vict Sex`)) +
   geom_bar(
     data = subset(crimes.df.sex.age, `Vict Sex` == "M"),
     aes(y = -count), stat = "identity", width = 0.6
-  ) + # Left side for males
+  ) +
   geom_bar(
     data = subset(crimes.df.sex.age, `Vict Sex` == "F"),
     stat = "identity", width = 0.6
-  ) + # Right side for females
-  scale_y_continuous(breaks = brks, labels = lbls) + # Custom y-axis breaks and labels
-  coord_flip() + # Flip axes for pyramid layout
+  ) +
+  scale_y_continuous(breaks = brks, labels = lbls) +
+  coord_flip() +
   labs(title = "Victim Age Distribution by Sex") +
-  theme_tufte() + # Minimal Tufte theme
+  theme_tufte() +
   theme(
     plot.title = element_text(hjust = .5),
     axis.ticks = element_blank()
-  ) + # Center plot title and remove axis ticks
-  scale_fill_brewer(palette = "Dark2") # Color palette for gender fill
+  ) +
+  scale_fill_brewer(palette = "Dark2")
 ```
 
 ```{r}
@@ -606,7 +606,7 @@ top_categories <- crimes.tib %>%
   group_by(Category) %>%
   summarize(total_count = n(), .groups = "drop") %>%
   arrange(desc(total_count)) %>%
-  slice_head(n = 15) # Die 15 häufigsten Kategorien
+  slice_head(n = 15)
 
 # Daten aufteilen in Top 15 und Rest
 top15_data <- crimes.tib %>%
