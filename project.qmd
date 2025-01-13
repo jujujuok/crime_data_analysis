@@ -10,10 +10,6 @@ date-format: "DD.MM.YYYY"
 
 # Crime Data Analysis
 
-Data: <https://catalog.data.gov/dataset/crime-data-from-2020-to-present>
-
-About Data: <https://data.lacity.org/Public-Safety/Crime-Data-from-2020-to-Present/2nrs-mtv8/about_data>
-
 Anmerkung: Mögliche Ungenauigkeiten, da die Daten von Papier Akten übertragen wurden
 
 OCC = Occurrence
@@ -804,6 +800,8 @@ Sind Ihre Erkenntnisse das, was Sie erwartet haben? Warum oder warum nicht?
 
 ## Quellenverzeichnis
 
+### Bibliotheken
+
 -   Müller K, Wickham H (2023). *tibble: Simple Data Frames*. R package version 3.2.1, <https://CRAN.R-project.org/package=tibble>
 
 -   Wickham H, Hester J, Bryan J (2024). *readr: Read Rectangular Text Data*. R package version 2.1.5, <https://CRAN.R-project.org/package=readr>
@@ -828,4 +826,10 @@ Sind Ihre Erkenntnisse das, was Sie erwartet haben? Warum oder warum nicht?
 
 -   Wickham H (2023). *stringr: Simple, Consistent Wrappers for Common String Operations*. R package version 1.5.1, <https://CRAN.R-project.org/package=stringr>
 
--   Datensatz:
+### Datensatz 
+
+-   City of Los Angeles (2024). *Crime Data from 2020 to Present.* <https://catalog.data.gov/dataset/crime-data-from-2020-to-present>, aufgerufen am 14.10.2024
+
+<!-- -->
+
+-   Los Angeles Police Department (2024). *About Data.* <https://data.lacity.org/Public-Safety/Crime-Data-from-2020-to-Present/2nrs-mtv8/about_data>, aufgerufen am 14.10.2024
