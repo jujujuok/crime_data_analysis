@@ -82,22 +82,6 @@ library(forcats)
 library(stringr)
 ```
 
-::: {.callout-note icon="false"}
-## Aufgabenstellung (10 Pkt.)
-
-Laden Sie die Daten in die R-Sitzung und verschaffen Sie sich einen ersten Überblick
-
--   Welche Typen sind enthalten? X
-
--   Ist sichergestellt, dass alle Daten den richtigen Type haben? X
-
--   Haben die Daten irgendwelche "Seltsamkeiten" mit denen Sie umgehen müssen, wie z.B. anders codierte `NA`'s, mehrere Tabellen, ... etc. \#
-
--   Je nach Datensatz können Sie die Daten auch in eine Datenbank laden und dann auf diese in R zugreifen. X
-
-Beschreiben Sie, was Sie tun müssen, bevor Sie die Daten im nächsten Abschnitt aufbereiten und bearbeiten können!
-:::
-
 ```{r}
 rm(list = ls())
 
@@ -128,8 +112,17 @@ mocodes.df <- mocodes.df.dirty %>%
 
 ### Hinzufügen von Straftat Klassifikationen
 
+Die Seite der Datenquelle verlinkt zusätzlich auf ein Dokument, welches die Straftaten zu bestimmten Klassifikationen zuordnet.
+Dieses Klassifikationen des Dokuments werden hier eingelesen.
+
 ```{r}
 crmcd.categories <- read_csv("crmcd_categories.csv")
+```
+
+Da die Quelle nicht für alle Codes der Straftaten Klassifikationen zur Verfügung stellt wurden diese zusätzlich auf Grund der Beschreibungen erstellt und werden hier eingelesen.
+
+```{r}
+missing_categories <- read_csv("missing_categories.csv")
 ```
 
 ### Analyse Rohdaten
@@ -155,17 +148,29 @@ Die folgenden Datentypen sind fäschlicherweise als Char abgespeichert:
 | Rpt Dist No | Bezirk des Verbrechens        | Integer            |
 | Mocodes     | Liste an Modus Operandi Codes | List               |
 
+Der passende Code wird im Abschnitt der Transformation verbessert.
+
 #### Spalten mit fehlenden Werten (NAs)
 
-In manchen Spalten befinden sich NAs, dazu gehören: - Es existieren NAs in manchen Spalten
+```{r}
+na_counts <- colSums(is.na(crimes.df.raw))
+print(na_counts)
+```
 
--   Weapon
--   Weapon Descd
--   Crime Codes –\> nicht alle Taten
+In manchen Spalten befinden sich NAs, dazu gehören Informationen über:
+
+-   Waffen
+-   Modus Operandi
+-   Geschlecht oder Abstammung des Opfers
+-   Den Tatort
+-   Zusätzliche Straftaten
+
+Es ist jedoch zu erwarten, dass diese Spalten nicht in jedem Fall einen Wert haben, da sie nicht auf jede Straftat zu treffen.
+So ist es beispielsweise normal, dass nicht jede Straftat mit einer Waffe begangen wird.
 
 ### Überprüfung Aussagen der Metadaten:
 
--   Crm Cd should be the same as Crm Cd 1
+-   "Crm Cd should be the same as Crm Cd 1"
 
     Crm Cd 1 sollte die gleichen Werte wie Crm Cd haben:
 
@@ -173,33 +178,21 @@ In manchen Spalten befinden sich NAs, dazu gehören: - Es existieren NAs in manc
     |--------|-------------------------------------------------------|
     | Crm Cd | Indicates the crime committed. (Same as Crime Code 1) |
 
-    Es gibt aber 1956 unterschiedliche Werte –\> todo analyse später
+    Diese Aussage wird in der Aufarbeitung überprüft.
 
--   Part 1-2 Weg löschen ?!
+-   Keine Information über Part 1-2
 
--   Area = Area Name ?!
+    Da es keine Informationen über die Bedeutung der Spalte Part 1-2 gibt, wird diese im folgenden Abschnitt entfernt.
 
--   Premise Cd = Premise Desc ?!
-
--   Weapon Use Cd = Weapon Desc ?!
+-   Die Codes für Straftaten, Bezirke und Ortsbeschreibungen entsprechen jeweils einer Beschreibung.
+    
+    Wir haben uns in jeder Auswertung jeweils auf die Verwendung von entweder Codes oder Beschreibungen beschränkt, weshalb dies keinen Einfluss auf die Auswertungen hat.
 
 ## 3. Transformation & Bearbeitung
 
-::: {.callout-note icon="false"}
-## Aufgabenstellung (15 Pkt.)
-
--   Umcodierung von Daten, z.B. numerisch in kategorial
-
--   Subsetting der Daten
-
--   Joining von Datentabellen - falls nötig. Welcher Join ist notwendig? Warum?
-
--   Übersicht der transformierten Daten. Sie können hierzu Hilfsmittel wie `glimpse()`, `skim()` und `head()` benutzen, um Ihre Erläuterungen zu veranschaulichen.
-
-Sind die sich ergebenden Daten so, wie Sie es erwartet haben? Warum oder warum nicht?
-:::
-
 ### Aufbereitung / Umcodierung
+
+Im folgenden werden die im vorherigen Abschnitt beschrieben Auffälligkeiten der Daten angepasst.
 
 ```{r}
 # Aufbereitung der Liste mit Codes zur Zuordnung der Modus Operandi
@@ -228,6 +221,9 @@ crmCd.diff <- which(crimes.df["Crm Cd"] != crimes.df["Crm Cd 1"])
 length(crmCd.diff)
 ```
 
+Hier ist zu sehen, dass `r length(crmCd.diff)` Werte der Primären Crime Codes nicht miteinander übereinstimmen.
+Da alle unserer Analysen mit der Hauptstraftat arbeiten, ist dies jedoch nicht für die Analyse relevant.
+
 ```{r}
 # Überprüfen, ob die Spalte nur NAs enthält
 if (all(is.na(crimes.df[["Crm Cd 4"]]))) {
@@ -243,19 +239,6 @@ crimes.df[["Part 1-2"]] <- NULL
 
 Die Spalte 'Part 1-2' hat keine offizielle Beschreibung und wir konnten ihr keine Bedeutung zuordnen, weshalb sie entfernt wird.
 
-#### In Klassifizierung der Straftaten sind nicht alle Straftaten enthalten
-
-```{r}
-missing_codes <- crimes.df %>%
-  anti_join(crmcd.categories, by = c("Crm Cd" = "Crm Cd")) %>%
-  select(`Crm Cd`, `Crm Cd Desc`) %>%
-  distinct()
-```
-
-```{r}
-missing_categories <- read_csv("missing_categories.csv")
-```
-
 ### Alle Kategorien in eine Tabelle
 
 ```{r}
@@ -265,7 +248,7 @@ categories <- rbind(missing_categories, crmcd.categories)
 Dem Datensatz wurden `r length(unique(categories$Category))` Kategorien an Verbrechen zugeordnet
 
 ```{r}
-rm(missing_codes, codes_to_numeric, missing_categories, crmcd.categories)
+rm(codes_to_numeric, missing_categories, crmcd.categories)
 ```
 
 ### Verbinden von MO & dem Datensatz
@@ -286,31 +269,21 @@ crimes.df.joined %>%
 
 ### Subsetting
 
--   Area
-
--   Geschlecht
-
--   Abstammung
-
--   Art des Crimes
+Wir haben auf ein generelles Subsetting der Daten verzichtet, um die tatsächliche Anzahl an Verbrechen im behandelten Zeitraum nicht zu verzerren.
+Es findet jedoch abhängig von der Analyse ein Subsetting basierend auf den Bezirken, Uhrzeiten und weiteren Eigenschaften statt.
 
 ### Übersicht des Dataframes
 
-// todo
+```{r}
+glimpse(crimes.df.joined)
+```
 
 ## Fazit - Transformation & Bearbeitung
 
-// todo
+Die Daten entsprechen größtenteils unseren Vermutungen, jedoch gibt es kleine Unstimmigkeiten innerhalb des Datensatzes.
+Diese betreffen jedoch Informationen, welche keinen Einfluss auf die Analyse der Daten haben und konnten deshalb, je nach Fall, entfernt oder ignoriert werden.
 
 ## 4. Geeignete Visualisierung und Aggregation der Daten
-
-::: {.callout-note icon="false"}
-## Aufgabenstellung (15 Pkt.)
-
-Fassen Sie die Daten in einer geeigenten Form zur Beantwortung Ihrer formulierten Fragestellung zusammen. Ziehen Sie auch geeignete Visualisierungen der transformierten und/oder aggregierten Daten heran, um Ihre Aussagen entsprechend zu untermauern oder zu veranschaulichen.
-
-Hier könne Sie auch geeignete statistische Verfahren bzw. Modellierungen nutzen, falls diese Ihnen bezüglich Ihrer Fragestellung weiterhelfen.
-:::
 
 -   Welche Klassen von Straftaten werden wie häufig begangen?
     -   Anzahl Proportional zu Schweregrad
@@ -344,6 +317,9 @@ leaflet(crimes.df.no_id_theft) %>%
   ) 
 ```
 
+Hier ist eine Übersicht von den Orten von 5000 zufällig ausgewählten Straftaten zu sehen, um einen groben Überblick zu schaffen.
+Man erkennt deutlich den länglichen Umriss der Stadt und kann sich durch die Auswahl einzelner Straftaten einen groben Eindruck über die Kriminalitätssituation machen
+
 ```{r}
 leaflet(crimes.df) %>%
   addTiles() %>% # Grundkarte hinzufügen
@@ -358,11 +334,14 @@ leaflet(crimes.df) %>%
   )
 ```
 
+In Form dieses Heatmap wird deutlich, dass die ganze Stadt ähnlich stark von Straftaten betroffen ist.
+Es gibt keine Gebiete innerhalb des behandelten Bereichs, welche tief rot oder blau eingefärbt sind, was jeweils sehr vielen bzw. wenigen Straftaten entsprechen würde.
+
 ```{r}
 rm(crimes.df.no_id_theft)
 ```
 
-### Combine Categories with crimes.tib
+### Combine Categories with `crimes.tib`
 
 ```{r}
 unique(crimes.tib$`AREA NAME`)
@@ -411,13 +390,15 @@ fig <- plot_ly(top_categories,
 )
 
 fig <- fig %>% layout(
-  title = "Top 15 Categories of Crimes (Others Combined)",
+  title = "Top 15 Kategorien an Straftaten (andere kombiniert)",
   xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
   yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)
 )
 
 fig
 ```
+Anhand der Verteilung der Straftatenkategorien ist zu sehen, dass keine einzelne Kategorie mit deutlichem Abstand heraussticht, sondern alle nur wenige Prozentpunkte auseinander liegen.
+Es ist jedoch auffällig, dass drei der Top 5 (Burglary/Theft from Vehicle, Other Theft, Grand Theft Auto) und sechs der Top 10 Kategorien (+ Personal Theft, Burglary, Robbery) Straftaten sind, welche mit Diebstahl zu tuen haben, also, dass der Täter sich berreichern wollte.
 
 ```{r}
 rm(category_count, top_categories, p, fig)
@@ -443,6 +424,9 @@ ggplotly(
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 )
 ```
+
+In diesem Diagramm ist zu sehen, dass es keine großen Unterschiede zwischen den verschiedenen Bezirken von Los Angeles gibt, wenn es um die Anteile an Straftatenklassen geht.
+Die Aufteilung ähnelt sich in allen Bezirken sehr.
 
 ```{r}
 rm(crime_counts)
@@ -485,7 +469,7 @@ ggplot(crime_data_long, aes(x = `AREA NAME`, y = count, fill = crime_type)) +
   geom_bar(stat = "identity") +
   scale_fill_manual(
     values = c("gang_count" = "steelblue", "non_gang_count" = "gray"),
-    labels = c("Gang-Related", "Non-Gang-Related")
+    labels = c("Non-Gang-Related", "Gang-Related")
   ) +
   labs(
     title = "Number of Gang-Related vs. Non-Gang-Related Crimes by Area",
@@ -496,6 +480,10 @@ ggplot(crime_data_long, aes(x = `AREA NAME`, y = count, fill = crime_type)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
+Zu sehen sind hier die Anteile der Straftaten, welche im Modus Operandi eine Bemerkung mit 'Gang' enthalten, bezogen auf die Bezirke der Stadt.
+Die X Achse ist nach Anzahl an Gang Straftaten sortiert und anhandder grauen Balken ist ein Vergleich zum Rest der Straftaten möglich.
+Es wird deutlich, dass der Anteil der Gang Straftaten stark variiert, jedoch in keinem der Bezirke einen deutlichen Anteil einnehmen.
 
 ```{r}
 rm(gang_crimes, total_crimes, crime_data, crime_data_long)
@@ -541,6 +529,9 @@ ggplot(
 rm(premis.grouped)
 ```
 
+Anhand dieses Lolipop Charts wird Sichtbar, wie viele Straftaten an bestimmten Arten von Orten begangen werden.
+Dabei ist Sichtbar, dass mit Abstand die meisten Straftaten auf offener Straße verübt werden, darauf folgen zwei Arten von Wohnungen.
+
 ### Personenabhängige Analysen
 
 #### Welche Bevölkerungsgruppe ist am meisten gefährdet? (Abhängig von Alter, Geschlecht, Abstammung)
@@ -576,7 +567,7 @@ ggplot(crimes.df.sex.age, aes(x = Age_Group, y = count, fill = `Vict Sex`)) +
   ) +
   scale_y_continuous(breaks = brks, labels = lbls) +
   coord_flip() +
-  labs(title = "Victim Age Distribution by Sex") +
+  labs(title = "Altersverteilung der Opfer abhängig vom Geschlecht") +
   theme_tufte() +
   theme(
     plot.title = element_text(hjust = .5),
@@ -584,6 +575,9 @@ ggplot(crimes.df.sex.age, aes(x = Age_Group, y = count, fill = `Vict Sex`)) +
   ) +
   scale_fill_brewer(palette = "Dark2")
 ```
+
+Anhand dieser Populations Pyramide bezogen auf Verbrechen lässt sich ein relativ symmetrisches Muster zwischen Männern und Frauen erkennen.
+Beide Geschlechter haben die meisten Opfer zwischen 26 und 35 Jahren.
 
 ```{r}
 rm(crimes.df.sex.age, brks, lbls)
@@ -669,13 +663,11 @@ plotly_top15
 plotly_rest
 ```
 
-// todo überarbeiten
+Diese zwei Plots stellen die Anzahl an Straftaten im zeitlichen Verlauf des Datensatzes dar.
+Der Starke Abfall aller Kategorien am Ende lässt sich darauf zurückschließen, dass die Daten auf der Digitalisierung von Akten beruhen und die neusten Akten noch nicht enthalten sind.
 
-Man kann hier in dem Plot eine starke Abnahme der Kriminalität vom Januar - Dezember 2021 sehen.
-
-2020 stieg die Zahl der Schießereien in Los Angeles um 40% im Vergleich zum Vorjahr. Dies war auf den Lockdown, psychische Belastungen und sozialen Stress zurückzuführen. Einbrüche nahmen zu, besonders in Wohngebieten, während Geschäfte während des Lockdowns geschlossen waren.
-
-Nach dem Mord an George Floyd kam es Ende Mai 2020 zu landesweiten Protesten. In Los Angeles gab es sporadische Gewalttätigkeiten, wobei Geschäfte geplündert wurden.
+An den meisten verläufen lässt sich kein klares Muster erkennen.
+Ausnahmen bilden hierbei die einfache Körperverletzung, welche in jedem Sommer ansteigt, und 'Personal Theft' was über das ganze Jahr 2022 deutlich höhere Werte verzeichnet.
 
 ```{r}
 rm(top_categories, top15_data, rest_data, top15_per_time, rest_per_time, plot_top15, plot_rest, plotly_top15, plotly_rest)
@@ -692,7 +684,7 @@ crimes_by_hour <- crimes.df.joined %>%
   mutate(time_rounded = round(`TIME OCC` / 100) * 100) %>%
   group_by(time_rounded) %>%
   summarize(count = n()) %>%
-  mutate(count = round(count - mean(count), 2)) %>%
+  mutate(count = round((count - mean(count))/num_days, 2)) %>%
   mutate(lower_higher = ifelse(count < 0, "lower", "higher")) %>%
   mutate(time_rounded = factor(time_rounded, levels = seq(0, 2300, by = 100))) %>%
   filter(!is.na(time_rounded))
@@ -713,6 +705,9 @@ ggplot(crimes_by_hour, aes(x = time_rounded, y = count, label = "Straftaten zu U
   coord_flip() +
   theme_bw()
 ```
+
+Im stündlichen Vergleich wird klar, dass die meisten Straftaten Nachmittags bis zum späten Abend zwischen 14 Uhr und 23 Uhr begangen werden.
+Hierbei stellt 12 Uhr einen Ausnahmefall dar, was entweder daran liegen könnte, dass Beispielsweise während der Mittagspause Verbrechen begangen werden, es kann jedoch auch sein, dass 12 Uhr als Standard in der Datenbank hinterlegt ist, was die Zahl künstlich verfälscht.
 
 ```{r}
 rm(num_days, crimes_by_hour)
@@ -755,6 +750,8 @@ ggplot(top_weapons, aes(x = "", y = count, fill = weapon)) +
   )
 ```
 
+Bei den meistgenutzten Waffen lässt sich deutlich erkennen, dass die meisten Straftaten, ohne direkte Waffengewalt durchgeführt werden, sondern mit reiner Körperkraft.
+
 ```{r}
 rm(weapon_count, top_weapons)
 ```
@@ -778,13 +775,12 @@ ggplot(status.df, aes(x = "", y = Count, fill = Status)) +
   )
 ```
 
+Die Verhaftungsrate des Los Angeles Police Department beträgt lediglich bei 8,7%.
+Knapp 80% der Fälle werden noch Untersucht, wobei viele der Fälle aufgrund der Zeitspanne der Daten schon mehrere Jahre alt sind.
+
 ```{r}
 rm(status.df)
 ```
-
-#### Wie effektiv ist die LAPD bei der Aufklärung verschiedener Arten von Straftaten?
-
-*Categorized Bar Chart, jede Bar aufgeteilt in Stati (Alle Bars gleich hoch?)*
 
 ## 5. Zusammenfassung und Schlussfolgerung
 
