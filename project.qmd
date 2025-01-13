@@ -36,6 +36,8 @@ Definieren Sie eine Sie interessierende bzw. interessante Fragestellung im Zusam
 -   Was erwarten Sie, angesichts Ihrer Fragestellung, bezüglich des Datensatzes? X
 :::
 
+// todo julia
+
 -   Welche Klassen von Straftaten werden wie häufig begangen?
     -   Anzahl Proportional zu Schweregrad
     -   Viele Diebstahle & andere Straftaten um Geld zu beschaffen
@@ -43,7 +45,6 @@ Definieren Sie eine Sie interessierende bzw. interessante Fragestellung im Zusam
     -   Ärmere Stadtteile
     -   Stadtteile mit Gang Gebieten
 -   Welche Stadtteile haben besonders viele Straftaten mit Gang Einfluss?
-    -   Kenne mich zu schlecht in LA aus
     -   Nicht Downtown & Beverly Hills (wohlhabendere Gegenden)
 -   Welche Bevölkerungsgruppe ist am meisten gefährdet? (Abhängig von Alter, Geschlecht, Abstammung)
     -   Junge Männer Schwarzer/Hispanischer Abstammung (weniger Wohlhaben + Gangs)
@@ -60,16 +61,12 @@ Definieren Sie eine Sie interessierende bzw. interessante Fragestellung im Zusam
     -   Am meisten am Abend/in der Nacht
     -   Anfang/Ende des Monats mehr Diebstahl/Raub? --\> Gehalt auszahlung Diebstahl usw.?
     -   Wochenenden -\> Party etc
-    -   Sommer -\> Menschen drehen bei Hitze durch
-    -   Dunkle Jahreszeiten -\> Schutz in der Dunkelheit
 -   Wie effektiv ist die LAPD bei der Aufklärung verschiedener Arten von Straftaten?
     -   Straftaten mit direktem Opfer mehr (Zeugen vorhanden)
 -   Welche Straftaten werden häufig am Anfang/Ende des Monats begangen?
     -   Gehalt auszahlung Diebstahl usw.?
 -   Wie hat sich die Kriminalität über die 3 Jahre verändert?
     -   In Corona deutlich abgenommen, ansonsten zugenommen
--   Wie häufig werden welche Bevölkerungsgruppen angezeigt / vgl zu wie viele Leute welcher Bevölkerungsgruppe wohnen dort?
-    -   Nicht in Datensatz glaube
 
 ## 2. Laden der Daten
 
@@ -133,7 +130,7 @@ mocodes.df <- mocodes.df.dirty %>%
   mutate(Code = as.integer(Code))
 ```
 
-### Hinzufügen von Straftat Klassifikation
+### Hinzufügen von Straftat Klassifikationen
 
 ```{r}
 crmcd.categories <- read_csv("crmcd_categories.csv")
@@ -149,7 +146,7 @@ Der Datensatz enthält eine Spalte mit MoCodes, welche eine Liste an Zahlen enth
 
 Das Datum ist standardmäßig im Format `MM/DD/YYYY HH:MM:SS AM/PM` angegeben. Jedoch enthalten die Datumsspalten keine Uhrzeit, diese ist, wenn vorhanden, separat angegeben.
 
-#### `Char`fälschlicherweise als Datentyp
+#### `Char` fälschlicherweise als Datentyp
 
 Die folgenden Datentypen sind fäschlicherweise als Char abgespeichert:
 
@@ -243,8 +240,6 @@ if (all(is.na(crimes.df[["Crm Cd 4"]]))) {
 }
 ```
 
-
-
 ```{r}
 # Löschen von Part 1-2
 crimes.df[["Part 1-2"]] <- NULL
@@ -265,7 +260,7 @@ missing_codes <- crimes.df %>%
 missing_categories <- read_csv("missing_categories.csv")
 ```
 
-### Join all categories in one table
+### Alle Kategorien in eine Tabelle
 
 ```{r}
 categories <- rbind(missing_categories, crmcd.categories)
@@ -277,9 +272,7 @@ Dem Datensatz wurden `r length(unique(categories$Category))` Kategorien an Verbr
 rm(missing_codes, codes_to_numeric, missing_categories, crmcd.categories)
 ```
 
-### Joining
-
--   MO & Tabelle
+### Verbinden von MO & dem Datensatz
 
 ```{r}
 crimes.df.joined <- crimes.df %>%
@@ -307,7 +300,11 @@ crimes.df.joined %>%
 
 ### Übersicht des Dataframes
 
+// todo
+
 ## Fazit - Transformation & Bearbeitung
+
+// todo
 
 ## 4. Geeignete Visualisierung und Aggregation der Daten
 
@@ -380,8 +377,6 @@ crimes.tib <- crimes.tib %>%
 crimes.tib <- merge(crimes.tib, categories, by = c("Crm Cd" = "Crm Cd"))
 ```
 
-
-
 #### Top 15 Kategorien an Straftaten
 
 ```{r}
@@ -428,7 +423,6 @@ fig <- fig %>% layout(
 fig
 ```
 
-
 ```{r}
 rm(category_count, top_categories, p, fig)
 ```
@@ -454,10 +448,10 @@ ggplotly(
 )
 ```
 
-
 ```{r}
 rm(crime_counts)
 ```
+
 #### Welche Stadtteile haben besonders viele Straftaten mit Gang Einfluss?
 
 ```{r}
@@ -550,6 +544,7 @@ ggplot(
 ```{r}
 rm(premis.grouped)
 ```
+
 ### Personenabhängige Analysen
 
 #### Welche Bevölkerungsgruppe ist am meisten gefährdet? (Abhängig von Alter, Geschlecht, Abstammung)
@@ -597,6 +592,7 @@ ggplot(crimes.df.sex.age, aes(x = Age_Group, y = count, fill = `Vict Sex`)) +
 ```{r}
 rm(crimes.df.sex.age, brks, lbls)
 ```
+
 ### Zeitliche Analysen
 
 #### Wie hat sich die Kriminalität über die 3 Jahre verändert?
@@ -677,17 +673,13 @@ plotly_top15
 plotly_rest
 ```
 
+// todo überarbeiten
 
+Man kann hier in dem Plot eine starke Abnahme der Kriminalität vom Januar - Dezember 2021 sehen.
 
+2020 stieg die Zahl der Schießereien in Los Angeles um 40% im Vergleich zum Vorjahr. Dies war auf den Lockdown, psychische Belastungen und sozialen Stress zurückzuführen. Einbrüche nahmen zu, besonders in Wohngebieten, während Geschäfte während des Lockdowns geschlossen waren.
 
-// TO BE Überarbeitet
-
-Man kann hier in dem Plot eine starke Abnahme der Kriminalität vom Januar - Dezember 2021 sehen. 
-
-2020 stieg die Zahl der Schießereien in Los Angeles um 40% im Vergleich zum Vorjahr. Dies war auf den Lockdown, psychische Belastungen und sozialen Stress zurückzuführen.
-Einbrüche nahmen zu, besonders in Wohngebieten, während Geschäfte während des Lockdowns geschlossen waren.
-
-Nach dem Mord an George Floyd kam es Ende Mai 2020 zu landesweiten Protesten. In Los Angeles gab es sporadische Gewalttätigkeiten, wobei Geschäfte geplündert wurden. 
+Nach dem Mord an George Floyd kam es Ende Mai 2020 zu landesweiten Protesten. In Los Angeles gab es sporadische Gewalttätigkeiten, wobei Geschäfte geplündert wurden.
 
 ```{r}
 rm(top_categories, top15_data, rest_data, top15_per_time, rest_per_time, plot_top15, plot_rest, plotly_top15, plotly_rest)
@@ -726,10 +718,10 @@ ggplot(crimes_by_hour, aes(x = time_rounded, y = count, label = "Straftaten zu U
   theme_bw()
 ```
 
-
 ```{r}
 rm(num_days, crimes_by_hour)
 ```
+
 ### Analysen der Straftaten
 
 #### Welche Arten von Waffen wird am meisten genutzt?
@@ -808,4 +800,32 @@ Fassen Sie hier Ihre Fragestellung und Ihre Erkenntnisse aus Ihrer Analyse zusam
 Sind Ihre Erkenntnisse das, was Sie erwartet haben? Warum oder warum nicht?
 :::
 
+// todo Julia
+
 ## Quellenverzeichnis
+
+-   Müller K, Wickham H (2023). *tibble: Simple Data Frames*. R package version 3.2.1, <https://CRAN.R-project.org/package=tibble>
+
+-   Wickham H, Hester J, Bryan J (2024). *readr: Read Rectangular Text Data*. R package version 2.1.5, <https://CRAN.R-project.org/package=readr>
+
+-   Wickham H, Vaughan D, Girlich M (2024). *tidyr: Tidy Messy Data*. R package version 1.3.1, <https://CRAN.R-project.org/package=tidyr>
+
+-   Wickham H, François R, Henry L, Müller K, Vaughan D (2023). *dplyr: A Grammar of Data Manipulation*. R package version 1.1.4, <https://CRAN.R-project.org/package=dplyr>
+
+-   H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016
+
+-   Arnold J (2024). *ggthemes: Extra Themes, Scales and Geoms for 'ggplot2'*. R package version 5.1.0, <https://CRAN.R-project.org/package=ggthemes>
+
+-   Wickham H, Henry L (2023). *purrr: Functional Programming Tools*. R package version 1.0.2, <https://CRAN.R-project.org/package=purrr>
+
+-   Cheng J, Schloerke B, Karambelkar B, Xie Y (2024). *leaflet: Create Interactive Web Maps with the JavaScript 'Leaflet' Library*. R package version 2.2.2, <https://CRAN.R-project.org/package=leaflet>
+
+-   C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny. Chapman and Hall/CRC Florida, 2020.
+
+-   Gohel D, Skintzos P (2024). *ggiraph: Make 'ggplot2' Graphics Interactive*. R package version 0.8.11, <https://CRAN.R-project.org/package=ggiraph>
+
+-   Wickham H (2023). *forcats: Tools for Working with Categorical Variables (Factors)*. R package version 1.0.0, <https://CRAN.R-project.org/package=forcats>
+
+-   Wickham H (2023). *stringr: Simple, Consistent Wrappers for Common String Operations*. R package version 1.5.1, <https://CRAN.R-project.org/package=stringr>
+
+-   Datensatz:
