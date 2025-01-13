@@ -22,47 +22,36 @@ Dabei sind Informationen über die Tat, wie bis zu vier Tatbestände, die verwen
 
 ## 1. Definition/Formulierung der Fragestellung
 
-::: {.callout-note icon="false"}
-## Aufgabenstellung (10 Pkt.) X
+**Fragestellung und Erwartungen in Bezug auf den Datensatz zur Kriminalität in Los Angeles:**  
 
-Definieren Sie eine Sie interessierende bzw. interessante Fragestellung im Zusammenhang mit dem Datensatz:
+- **Häufigkeit und Klassifizierung von Straftaten:**  
+    Es wird erwartet, dass die Häufigkeit von Straftaten mit ihrem Schweregrad variiert. Besonders häufig dürften z.B. Diebstähle und Beleidigungen auftreten.  
 
--   Was interessiert Sie an dem Datensatz? X
--   Welche spezifische Fragestellung würden Sie gern mit Hilfe des Datensatzes beantworten? X
--   Was erwarten Sie, angesichts Ihrer Fragestellung, bezüglich des Datensatzes? X
-:::
+- **Geografische Verteilung von Straftaten:**  
+    Ärmere Gegenden werden vermutlich eine höhere Kriminalitätsrate aufweisen.
+    Stadtteile wie Downtown und Beverly Hills, die als wohlhabend gelten, dürften weniger stark vom Einfluss der Gangs betroffen sein. In Vierteln mit hoher Gangaktivität könnte die Kriminalitätsrate jedoch signifikant höher sein.  
 
-// todo julia
+- **Betroffene Bevölkerungsgruppen:**  
+    Junge Männer schwarzer oder hispanischer Abstammung scheinen aufgrund sozioökonomischer Faktoren und Gang-Aktivitäten besonders gefährdet zu sein. Bei Sexualstraftaten sind voraussichtlich junge weiße Frauen überproportional betroffen.  
 
--   Welche Klassen von Straftaten werden wie häufig begangen?
-    -   Anzahl Proportional zu Schweregrad
-    -   Viele Diebstahle & andere Straftaten um Geld zu beschaffen
--   Welche Stadtteile sind besonders betroffen?
-    -   Ärmere Stadtteile
-    -   Stadtteile mit Gang Gebieten
--   Welche Stadtteile haben besonders viele Straftaten mit Gang Einfluss?
-    -   Nicht Downtown & Beverly Hills (wohlhabendere Gegenden)
--   Welche Bevölkerungsgruppe ist am meisten gefährdet? (Abhängig von Alter, Geschlecht, Abstammung)
-    -   Junge Männer Schwarzer/Hispanischer Abstammung (weniger Wohlhaben + Gangs)
-    -   Junge weiße Frauen bei Sexualstraftaten
--   Gibt es besonders Gefährliche Arten von Orten (\[Premise Desc\])
-    -   Motels, Parking Lot, Street
-    -   Internet aka. Cyberspace
--   Welche Arten von Waffen wird am meisten genutzt?
-    -   Meistens nur unbewaffnet
-    -   Recht viele Schusswaffen
--   Wie viel Prozent haben zu Verhaftungen (und welcher Art) geführt?
-    -   Hoffentlich über 80%
--   Gibt es zeitliche Rahmen in denen mehr oder weniger Verbrechen geschehen?
-    -   Am meisten am Abend/in der Nacht
-    -   Anfang/Ende des Monats mehr Diebstahl/Raub? --\> Gehalt auszahlung Diebstahl usw.?
-    -   Wochenenden -\> Party etc
--   Wie effektiv ist die LAPD bei der Aufklärung verschiedener Arten von Straftaten?
-    -   Straftaten mit direktem Opfer mehr (Zeugen vorhanden)
--   Welche Straftaten werden häufig am Anfang/Ende des Monats begangen?
-    -   Gehalt auszahlung Diebstahl usw.?
--   Wie hat sich die Kriminalität über die 3 Jahre verändert?
-    -   In Corona deutlich abgenommen, ansonsten zugenommen
+- **Gefährliche Orte für Kriminalität:**  
+    Orte wie Motels, Parkplätze oder Straßen dürften häufiger mit Verbrechen in Verbindung stehen. Darüber hinaus könnten auch der Cyberspace und Internetaktivitäten eine Rolle spielen.  
+
+- **Verwendung von Waffen:**  
+    Der Großteil der Straftaten wird vermutlich ohne Waffen verübt. Dennoch ist ein signifikanter Anteil an Vorfällen mit Schusswaffen zu erwarten.  
+
+- **Aufklärungs-/Verhaftungsrate:**  
+    Vermutlich werden etwa 50%, der Straftaten zu aufgeklärt. Die Art der Straftaten könnte dabei die Verhaftungsquote beeinflussen.  
+
+- **Zeitliche Muster in der Kriminalität:**  
+    Verbrechen treten wahrscheinlich häufiger abends und nachts auf. Am Monatsanfang und -ende könnte es aufgrund von Gehaltszahlungen zu einem Anstieg von Diebstählen und Raubüberfällen kommen. Zudem ist anzunehmen, dass an Wochenenden durch Partys eine erhöhte Kriminalitätsrate auftritt.  
+
+- **Effektivität der LAPD:**  
+    Straftaten mit direktem Opfer und vorhandenen Zeugen dürften mit höherer Wahrscheinlichkeit aufgeklärt werden als Delikte ohne unmittelbare Beteiligte.  
+
+- **Entwicklung der Kriminalität über drei Jahre:**  
+    Während der Corona-Pandemie dürfte ein deutlicher Rückgang der Kriminalität zu beobachten sein, während die Straftaten insgesamt vermutlich angestiegen sind.
+
 
 ## 2. Laden der Daten
 
